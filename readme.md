@@ -1,19 +1,19 @@
-ogg.js
-======
+# libvorbis.js
 
-libogg, libvorbis, and libopus compiled to JavaScript with Emscripten for [Aurora.js](https://github.com/audiocogs/aurora.js).
+This is my (failed) attempt at trying to encode audio into OGG Vorbis.
 
-## Building
+However, if you want to give it a try yourself, be my guest. Follow these steps:
 
-1. Install [Emscripten](https://github.com/kripken/emscripten/wiki/Tutorial).
-2. Clone git submodules
-3. Run `compileOgg.sh` to configure and build libogg and the C wrapper. Run this again whenever you make changes to the C wrapper or a new version of libogg is released.
-4. Install [importer](https://github.com/devongovett/importer) with `npm install importer -g`.
-5. Run `importer src/ogg.js build/ogg.js` to generate a JavaScript file with libogg and the Aurora.js wrapper, or to run a development server use `importer src/ogg.js -p 5000` for example.
+- install the Git submodules by running `git submodule init && git submodule update`
+- and then run `compileOgg.sh && compileVorbis.sh`
 
-The steps to build libvorbis and libopus are the same, just using their respective compilation scripts and modified `importer` filenames.
+You should now be able to write your own Vorbis encoder. For a quick start, give the `encoder_example.c` a try, by running
 
-## License
+```shell
+compileProgram.sh
+cat techno.wav | node encoder_example.js > techno.ogg
+```
 
-libogg, libvorbis, and libopus are available under their respective licenses, and the JavaScript and C wrapper code in this repo
-for Aurora.js is licensed under MIT.
+# Acknowledgement
+
+This code is a fork of [Devon Govett](https://github.com/devongovett)'s [ogg.js](https://github.com/devongovett/ogg.js).
