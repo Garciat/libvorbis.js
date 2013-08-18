@@ -19,5 +19,5 @@ fi
 emmake make
 
 # compile wrapper
-cd ..
-emcc -O2 -s ASM_JS=1 -s EXPORTED_FUNCTIONS="['_AVOggInit', '_AVOggRead', '_AVOggDestroy']" --js-library src/callback.js -I libogg/include -Llibogg/src/.libs/ -logg src/ogg.c -o build/libogg.js
+#cd ..
+#emcc -O2 -s ASM_JS=1 -s EXPORTED_FUNCTIONS="['_AVOggInit', '_AVOggRead', '_AVOggDestroy']" --js-library src/callback.js -I libogg/include -Llibogg/src/.libs/ -logg src/ogg.c -o build/libogg.js
