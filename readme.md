@@ -1,6 +1,6 @@
 # vorbis.js
 
-This combines work from {} ( vorbis.cpp ) and effort from {} who, in turn, forked, Devon Govett's original repo
+This combines work from [Alex Barkan](http://hotcashew.com/2014/02/chrome-audio-api-and-ogg-vorbis/) ( vorbis.cpp ) and effort from  [Salehen Rahman](https://github.com/shovon/libvorbis.js) who, in turn, forked, Devon Govett's [original repo](https://github.com/devongovett/ogg.js)
 
 ##What it is
 
