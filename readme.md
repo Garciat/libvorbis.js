@@ -8,11 +8,14 @@ This spits out a javascript file that can be used in the browser to convert PCM 
 
 ## Build
 
-Ensure that you have the emscripten installed.
+- Ensure that you have the emscripten installed.
+  - i.e. you need access to `emcc`
 
 ```bash
 git submodule init
 git submodule update
+./compileOgg.sh
+./compileVorbis.sh
 ./build.sh
 ```
 
