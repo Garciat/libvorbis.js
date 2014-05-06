@@ -26,8 +26,17 @@ These steps will output vorbis.js
 <script src='vorbis.js'></script>
 <script>
   var state = Module._lexy_encoder_start(44100, 3);
+  
+  /* 
+    Imagine stream is an audio stream emitting appropriate PCM buffers.
+    See ScriptProcessorNode in the Web Audio API ( https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html )
+    for how 
+    
+    Instead of stream.on('write' ... ) you would do processorNode.onaudioprocess = fn
+  
+  */
 
-  this.on('write', function(left_buffer, right_buffer) {
+  stream.on('write', function(left_buffer, right_buffer) {
 
     // Allocate memory using _malloc
     var left_buffer_ptr = Module._malloc( left_buffer.length * left_buffer.BYTES_PER_ELEMENT );
@@ -45,7 +54,7 @@ These steps will output vorbis.js
     Module._free( right_buffer_ptr );
   }
 
-  this.on('finish', function() {
+  stream.on('finish', function() {
     Module._lexy_encoder_finish( state );
     var ogg_ptr = Module._lexy_get_buffer( state );
     var ogg_data = Module.HEAPU8.subarray( ptr, ptr + Module._lexy_get_buffer_length( state )
