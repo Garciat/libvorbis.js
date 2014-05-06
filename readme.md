@@ -60,7 +60,7 @@ These steps will output vorbis.js
   stream.on('finish', function() {
     Module._lexy_encoder_finish( state );
     var ogg_ptr = Module._lexy_get_buffer( state );
-    var ogg_data = Module.HEAPU8.subarray( ptr, ptr + Module._lexy_get_buffer_length( state )
+    var ogg_data = Module.HEAPU8.subarray( ptr, ptr + Module._lexy_get_buffer_length( state ) );
 
     var ogg_blob = new Blob([ ogg_data ], {
       type: 'audio/ogg'
