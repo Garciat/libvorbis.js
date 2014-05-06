@@ -25,18 +25,19 @@ These steps will output vorbis.js
 ```html
 <script src='vorbis.js'></script>
 <script>
-  var state = Module._lexy_encoder_start(44100, 3);
+  
   
   /* 
     Imagine stream is an audio stream emitting appropriate PCM buffers.
     
-    
     See ScriptProcessorNode in the Web Audio API for how all this happens
     in the wild. Long story short it goes like: node.onaudioprocess = fn
+    
     ( https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html )
-
-  
   */
+  
+  // _lexy_encoder_start accepts sampleRate and compression quality ( 0-10 )
+  var state = Module._lexy_encoder_start(44100, 3);
 
   stream.on('write', function(left_buffer, right_buffer) {
 
