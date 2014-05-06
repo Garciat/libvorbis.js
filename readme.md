@@ -29,10 +29,12 @@ These steps will output vorbis.js
   
   /* 
     Imagine stream is an audio stream emitting appropriate PCM buffers.
-    See ScriptProcessorNode in the Web Audio API ( https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html )
-    for how 
     
-    Instead of stream.on('write' ... ) you would do processorNode.onaudioprocess = fn
+    
+    See ScriptProcessorNode in the Web Audio API for how all this happens
+    in the wild. Long story short it goes like: node.onaudioprocess = fn
+    ( https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html )
+
   
   */
 
