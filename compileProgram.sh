@@ -1,1 +1,0 @@
-emcc -O1 -s ASM_JS=1 -I libvorbis/include -Llibvorbis/lib/.libs -lvorbis -I libogg/include -Llibogg/src/.libs -lvorbisenc -logg encoder_example.c -o encoder_example.js
