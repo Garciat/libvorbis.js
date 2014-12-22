@@ -58,8 +58,6 @@ LIBOGG_BCS=build/libogg/*.bc
 LIBVORBIS_BCS=build/libvorbis/*.bc
 WRAPPER_BCS=build/wrapper/*.bc
 
--s ALLOW_MEMORY_GROWTH=1 -s ASM_JS=1 -s EXPORTED_FUNCTIONS='["_lexy_encoder_start", "_lexy_encoder_write", "_lexy_encoder_finish", "_lexy_get_buffer_length", "_lexy_get_buffer"]'
-
 mkdir -p $COMPILE_OUTDIR
 
 buildcmd="$CC $COMPILE_FLAGS $LIBOGG_BCS $LIBVORBIS_BCS $WRAPPER_BCS --pre-js $COMPILE_PREJS --post-js $COMPILE_POSTJS -o $COMPILE_OUTDIR/$COMPILE_TARGET"
