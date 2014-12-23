@@ -1,5 +1,5 @@
 CC=emcc
-CCFLAGS="-O2 -Iinclude"
+CCFLAGS="-O3 -Iinclude"
 
 LIBOGG_SRCDIR=libogg/src
 LIBOGG_INCLUDES="-I$LIBOGG_SRCDIR -Ilibogg/include"
@@ -19,11 +19,16 @@ WRAPPER_OUTDIR=build/wrapper
 COMPILE_PREJS=src/pre.js
 COMPILE_POSTJS=src/post.js
 COMPILE_TARGET=libvorbis.js
+COMPILE_TARGET_OPT=libvorbis.min.js
 COMPILE_OUTDIR=dist
 COMPILE_FLAGS="-s ALLOW_MEMORY_GROWTH=1 -s ASM_JS=1 -s EXPORTED_FUNCTIONS=@exported_functions.json"
 COMPILE_FLAGS="$COMPILE_FLAGS --pre-js $COMPILE_PREJS --post-js $COMPILE_POSTJS"
+COMPILE_FLAGS_OPT="-O3 $COMPILE_FLAGS"
+COMPILE_FLAGS="-O1 $COMPILE_FLAGS"
 
 ### libogg
+
+echo ":: Compiling libogg..."
 
 mkdir -p $LIBOGG_OUTDIR
 
@@ -35,6 +40,8 @@ done
 
 ### libvorbis
 
+echo ":: Compiling libvorbis..."
+
 mkdir -p $LIBVORBIS_OUTDIR
 
 for srcfile in $LIBVORBIS_SRCS; do
@@ -44,6 +51,8 @@ for srcfile in $LIBVORBIS_SRCS; do
 done
 
 ### wrapper
+
+echo ":: Compiling wrapper..."
 
 mkdir -p $WRAPPER_OUTDIR
 
@@ -55,12 +64,22 @@ done
 
 ### compile
 
-LIBOGG_BCS=LIBOGG_OUTDIR/*.bc
-LIBVORBIS_BCS=LIBVORBIS_OUTDIR/*.bc
-WRAPPER_BCS=WRAPPER_OUTDIRP/*.bc
+LIBOGG_BCS=$LIBOGG_OUTDIR/*.bc
+LIBVORBIS_BCS=$LIBVORBIS_OUTDIR/*.bc
+WRAPPER_BCS=$WRAPPER_OUTDIR/*.bc
 
 mkdir -p $COMPILE_OUTDIR
+
+echo ":: Compiling target..."
 
 buildcmd="$CC $COMPILE_FLAGS $LIBOGG_BCS $LIBVORBIS_BCS $WRAPPER_BCS -o $COMPILE_OUTDIR/$COMPILE_TARGET"
 echo $buildcmd
 $buildcmd
+
+echo ":: Compiling target (minified)..."
+
+buildcmd="$CC $COMPILE_FLAGS_OPT $LIBOGG_BCS $LIBVORBIS_BCS $WRAPPER_BCS -o $COMPILE_OUTDIR/$COMPILE_TARGET_OPT"
+echo $buildcmd
+$buildcmd
+
+echo ":: DONE"
