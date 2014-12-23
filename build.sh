@@ -1,5 +1,5 @@
 CC=emcc
-CCFLAGS="-O3 -Iinclude"
+CCFLAGS="-O3 -ffast-math -Iinclude"
 
 LIBOGG_SRCDIR=libogg/src
 LIBOGG_INCLUDES="-I$LIBOGG_SRCDIR -Ilibogg/include"
