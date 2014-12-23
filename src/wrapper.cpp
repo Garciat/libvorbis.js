@@ -4,6 +4,8 @@
 #include <stdlib.h> // srand
 #include <string.h> // memcpy
 
+#include <vector>
+
 #include <vorbis/vorbisenc.h>
 
 struct tEncoderState
@@ -22,22 +24,20 @@ struct tEncoderState
   int sample_rate;
   int granulepos;
   
-  int encoded_max_size;
-  int encoded_length;
-  
-  unsigned char* encoded_buffer;
+  std::vector<unsigned char> output_buffer;
 };
+
+static inline void append(std::vector<unsigned char> &v, unsigned char *p, long n)
+{
+    v.insert(end(v), p, p + n);
+}
 
 // write encoded ogg page to a file or buffer
 void write_page(tEncoderState* state, ogg_page* page)
 {
-    memcpy(state->encoded_buffer + state->encoded_length, page->header, page->header_len);
-    state->encoded_length += page->header_len;
+    append(state->output_buffer, page->header, page->header_len);
 
-    memcpy(state->encoded_buffer + state->encoded_length, page->body, page->body_len);
-    state->encoded_length += page->body_len;
-
-    //printf("write_page(); total encoded stream length: %i bytes\n", state->encoded_length);
+    append(state->output_buffer, page->body, page->body_len);
 }
 
 // preps encoder, allocates output buffer
@@ -55,15 +55,9 @@ extern "C" tEncoderState* lexy_encoder_start(int sample_rate = 48000, float vbr_
     state->num_channels = 2;
     state->sample_rate = sample_rate;
     
-    // max duration. 3 mins = 180 sec @ 128kbit/s = ~3MB
-    state->encoded_buffer = new unsigned char[3 * 1024 * 1024]; // final encoded-audio buffer
-    
 #if DEBUG
     printf("lexy_encoder_start(); initializing vorbis encoder with sample_rate = %i Hz and vbr quality = %3.2f\n", state->sample_rate, vbr_quality);
 #endif
-    
-    state->encoded_max_size = 0;
-    state->encoded_length = 0;
     
     // initialize vorbis
     vorbis_info_init(&state->vi);
@@ -169,7 +163,7 @@ extern "C" void lexy_encoder_finish(tEncoderState* state)
     }
     
 #if DEBUG
-    printf("lexy_encoder_finish(); final encoded stream length: %i bytes\n", state->encoded_length);
+    printf("lexy_encoder_finish(); final encoded stream length: %i bytes\n", state->output_buffer.size());
     printf("lexy_encoder_finish(); cleaning up\n");
 #endif
     
@@ -183,12 +177,12 @@ extern "C" void lexy_encoder_finish(tEncoderState* state)
 // grab buffer and its length
 extern "C" unsigned char* lexy_get_buffer(tEncoderState* state)
 {
-    return state->encoded_buffer;
+    return state->output_buffer.data();
 }
 
 extern "C" int lexy_get_buffer_length(tEncoderState* state)
 {
-    return state->encoded_length;
+    return state->output_buffer.size();
 }
 
 #if DEBUG
