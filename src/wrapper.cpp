@@ -102,11 +102,9 @@ extern "C" void lexy_encoder_write(tEncoderState* state, float* input_buffer_lef
     // get space in which to copy uncompressed data
     float** buffer = vorbis_analysis_buffer(&state->vd, num_samples);
 
-    // copy non-interleaved channels
-    for(int i = 0; i < num_samples; i ++) {
-        buffer[0][i] = input_buffer_left[i];
-        buffer[1][i] = input_buffer_right[i];
-    }
+    // write uncompressed data
+    memcpy(buffer[0], input_buffer_left,  num_samples * sizeof(float));
+    memcpy(buffer[1], input_buffer_right, num_samples * sizeof(float));
 
     vorbis_analysis_wrote(&state->vd, num_samples);
 
