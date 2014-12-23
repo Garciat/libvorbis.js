@@ -26,6 +26,8 @@ COMPILE_FLAGS="$COMPILE_FLAGS --pre-js $COMPILE_PREJS --post-js $COMPILE_POSTJS"
 COMPILE_FLAGS_OPT="-O3 $COMPILE_FLAGS"
 COMPILE_FLAGS="-O1 $COMPILE_FLAGS"
 
+set -e
+
 ### libogg
 
 echo ":: Compiling libogg..."
