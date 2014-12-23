@@ -1,8 +1,8 @@
-# vorbis.js
+# libvorbis.js
 
 This combines work from [Alex Barkan](http://hotcashew.com/2014/02/chrome-audio-api-and-ogg-vorbis/) ( vorbis.cpp ) and effort from  [Salehen Rahman](https://github.com/shovon/libvorbis.js) who, in turn, forked, Devon Govett's [original repo](https://github.com/devongovett/ogg.js)
 
-##What it is
+## What it is
 
 This spits out a javascript file that can be used in the browser to convert PCM audio data to compressed ogg vorbis audio.
 
@@ -21,6 +21,24 @@ version (libvorbis.min.js **and** libvorbis.min.js.mem)
 git submodule init
 git submodule update
 ./build.sh
+```
+
+## API
+
+Currently the API is quite limited.
+Lower-level (direct libvorbis API access) as well as higher-level (JS class wrapper)
+will soon be provided. Stay tuned.
+
+(types added for descriptive purposes)
+
+```csharp
+using StateHandle = int;
+
+StateHandle Vorbis.init(int sampleRate, float quality);
+
+void Vorbis.encode(StateHandle state, Float32Array leftBuffer, Float32Array rightBuffer);
+
+Uint8Array Vorbis.finish(StateHandle state);
 ```
 
 ## MIT License
