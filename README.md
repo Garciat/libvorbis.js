@@ -6,6 +6,12 @@ This combines work from [Alex Barkan](http://hotcashew.com/2014/02/chrome-audio-
 
 This spits out a javascript file that can be used in the browser to convert PCM audio data to compressed ogg vorbis audio.
 
+## Download
+
+Head over to the [releases](https://github.com/Garciat/libvorbis.js/releases) page
+and download either the development version (libvorbis.js) or the minified "production"
+version (libvorbis.min.js **and** libvorbis.min.js.mem)
+
 ## Build
 
 - Ensure that you have the emscripten installed.
@@ -14,64 +20,12 @@ This spits out a javascript file that can be used in the browser to convert PCM 
 ```bash
 git submodule init
 git submodule update
-./compileOgg.sh
-./compileVorbis.sh
 ./build.sh
-```
-
-These steps will output vorbis.js
-
-## Example
-```html
-<script src='vorbis.js'></script>
-<script>
-  
-  
-  /* 
-    Imagine stream is an audio stream emitting appropriate PCM buffers.
-    
-    See ScriptProcessorNode in the Web Audio API for how all this happens
-    in the wild. Long story short it goes like: node.onaudioprocess = fn
-    
-    ( https://dvcs.w3.org/hg/audio/raw-file/tip/webaudio/specification.html )
-  */
-  
-  // _lexy_encoder_start accepts sampleRate and compression quality ( 0-10 )
-  var state = Module._lexy_encoder_start(44100, 3);
-
-  stream.on('write', function(left_buffer, right_buffer) {
-
-    // Allocate memory using _malloc
-    var left_buffer_ptr = Module._malloc( left_buffer.length * left_buffer.BYTES_PER_ELEMENT );
-    var right_buffer_ptr = Module._malloc( right_buffer.length * right_buffer.BYTES_PER_ELEMENT );
-
-    // Set the buffer values in memory
-    Module.HEAPF32.set( left_buffer, left_buffer_ptr>>2 );
-    Module.HEAPF32.set( right_buffer, right_buffer_ptr>>2 );
-
-    // Write data to encoder
-    Module._lexy_encoder_write( state, left_buffer_ptr, right_buffer_ptr, buffer_length );
-
-    // Free the memory
-    Module._free( left_buffer_ptr );
-    Module._free( right_buffer_ptr );
-  }
-
-  stream.on('finish', function() {
-    Module._lexy_encoder_finish( state );
-    var ogg_ptr = Module._lexy_get_buffer( state );
-    var ogg_data = Module.HEAPU8.subarray( ptr, ptr + Module._lexy_get_buffer_length( state ) );
-
-    var ogg_blob = new Blob([ ogg_data ], {
-      type: 'audio/ogg'
-    });
-  });
-</script>
 ```
 
 ## MIT License
 
-Copyright (c) 2014 Joe Sullivan
+Copyright (c) 2014 Joe Sullivan, Gabriel Garcia
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
