@@ -4,8 +4,6 @@
 #include <stdlib.h> // srand
 #include <string.h> // memcpy
 
-#include <vector>
-
 #include <vorbis/vorbisenc.h>
 
 struct tEncoderState
@@ -27,20 +25,42 @@ struct tEncoderState
   int input_num_samples;
   float **input_buffer;
   
-  std::vector<unsigned char> output_buffer;
+  unsigned char *output_buffer;
+  long output_buffer_max;
+  long output_buffer_len;
+  
+  tEncoderState() {
+    output_buffer = NULL;
+    alloc_output_buffer(512 * 1024); // 0.5MB initial size
+  }
+  
+  void alloc_output_buffer(long n) {
+    output_buffer = (unsigned char*)realloc(output_buffer, n);
+    output_buffer_max = n;
+  }
+  
+  void grow_output_buffer(long n) {
+    long new_max = output_buffer_max;
+    while (output_buffer_len + n > new_max) {
+        new_max *= 2;
+    }
+    alloc_output_buffer(new_max);
+  }
+  
+  void push_output(unsigned char *p, long n) {
+    if (output_buffer_len + n > output_buffer_max) {
+      grow_output_buffer(n);
+    }
+    
+    memcpy(output_buffer + output_buffer_len, p, n);
+    output_buffer_len += n;
+  }
 };
 
-static inline void append(std::vector<unsigned char> &v, unsigned char *p, long n)
-{
-    v.insert(end(v), p, p + n);
-}
-
-// write encoded ogg page to a file or buffer
 void write_page(tEncoderState* state, ogg_page* page)
 {
-    append(state->output_buffer, page->header, page->header_len);
-
-    append(state->output_buffer, page->body, page->body_len);
+    state->push_output(page->header, page->header_len);
+    state->push_output(page->body,   page->body_len);
 }
 
 // preps encoder, allocates output buffer
@@ -171,7 +191,7 @@ extern "C" void lexy_encoder_finish(tEncoderState* state)
     }
     
 #if DEBUG
-    printf("lexy_encoder_finish(); final encoded stream length: %i bytes\n", state->output_buffer.size());
+    printf("lexy_encoder_finish(); final encoded stream length: %ld bytes\n", state->output_buffer_len);
     printf("lexy_encoder_finish(); cleaning up\n");
 #endif
     
@@ -185,62 +205,10 @@ extern "C" void lexy_encoder_finish(tEncoderState* state)
 // grab buffer and its length
 extern "C" unsigned char* lexy_get_buffer(tEncoderState* state)
 {
-    return state->output_buffer.data();
+    return state->output_buffer;
 }
 
 extern "C" int lexy_get_buffer_length(tEncoderState* state)
 {
-    return state->output_buffer.size();
+    return state->output_buffer_len;
 }
-
-#if DEBUG
-// complete encoder test: init, encode, shutdown.
-extern "C" tEncoderState* lexy_test()
-{
-    tEncoderState *state = lexy_encoder_start();
-    
-    // generate a test sound
-    float* input_buffer_left = new float[state->sample_rate]; // one second long buffer
-    float* input_buffer_right = new float[state->sample_rate]; // one second long buffer
-    float test_frequency = 400; // hz
-
-    for(int i = 0; i < state->sample_rate; i ++)
-    {
-        float fraction = (float) i / (float) state->sample_rate;
-        input_buffer_left[i] =  sin(M_PI * 2 * test_frequency * fraction);
-        input_buffer_right[i] =  sin(M_PI * 2 * test_frequency * fraction);
-    }
-    
-    lexy_encoder_write(state, input_buffer_left, input_buffer_right, state->sample_rate);
-    lexy_encoder_finish(state);
-    return state;
-}
-
-// encodes a test signal
-extern "C" void lexy_write_test(tEncoderState *state)
-{
-    printf("lexy_write_test(); writing test sound at %i samples/sec with %i channels\n", state->sample_rate, state->num_channels);
-
-     // generate a test sound
-    float* input_buffer_left = new float[state->sample_rate]; // one second long buffer
-    float* input_buffer_right = new float[state->sample_rate]; // one second long buffer
-    float test_frequency = 400; // hz
-
-    for(int i = 0; i < state->sample_rate; i ++)
-    {
-        float fraction = (float) i / (float) state->sample_rate;
-        input_buffer_left[i] =  sin(M_PI * 2 * test_frequency * fraction);
-        input_buffer_right[i] =  sin(M_PI * 2 * test_frequency * fraction);
-    }
-    
-    lexy_encoder_write(state, input_buffer_left, input_buffer_right, state->sample_rate);
-}
-
-// for testing in console
-extern "C" int main()
-{
-    lexy_test();
-
-    return 0;
-}
-#endif
