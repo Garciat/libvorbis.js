@@ -97,8 +97,6 @@ extern "C" tEncoderState* lexy_encoder_start(int sample_rate = 48000, float vbr_
 // input should be more than 10ms long
 extern "C" void lexy_encoder_write(tEncoderState* state, float* input_buffer_left, float* input_buffer_right, int num_samples)
 {
-    unsigned char* ogg_buffer = new unsigned char[state->rate];
-
     // get space in which to copy uncompressed data
     float** buffer = vorbis_analysis_buffer(&state->vd, num_samples);
 
