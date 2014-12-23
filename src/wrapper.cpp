@@ -29,7 +29,7 @@ struct tEncoderState
 };
 
 // write encoded ogg page to a file or buffer
-int write_page(tEncoderState* state, ogg_page* page)
+void write_page(tEncoderState* state, ogg_page* page)
 {
     memcpy(state->encoded_buffer + state->encoded_length, page->header, page->header_len);
     state->encoded_length += page->header_len;
@@ -38,7 +38,6 @@ int write_page(tEncoderState* state, ogg_page* page)
     state->encoded_length += page->body_len;
 
     //printf("write_page(); total encoded stream length: %i bytes\n", state->encoded_length);
-    return 0;
 }
 
 // preps encoder, allocates output buffer
@@ -59,7 +58,9 @@ extern "C" tEncoderState* lexy_encoder_start(int sample_rate = 48000, float vbr_
     // max duration. 3 mins = 180 sec @ 128kbit/s = ~3MB
     state->encoded_buffer = new unsigned char[3 * 1024 * 1024]; // final encoded-audio buffer
     
+#if DEBUG
     printf("lexy_encoder_start(); initializing vorbis encoder with sample_rate = %i Hz and vbr quality = %3.2f\n", state->sample_rate, vbr_quality);
+#endif
     
     state->encoded_max_size = 0;
     state->encoded_length = 0;
@@ -69,7 +70,9 @@ extern "C" tEncoderState* lexy_encoder_start(int sample_rate = 48000, float vbr_
     if(vorbis_encode_init_vbr(&state->vi, 2, state->sample_rate, vbr_quality)) // vbr
     //if(vorbis_encode_init(&state->vi,state->num_channels,sample_rate,-1,192000,-1)) // abr
     {
+#if DEBUG
         printf("lexy_encoder_start(); error initializing vorbis encoder\n");
+#endif
         return NULL;
     }
     
@@ -130,7 +133,9 @@ extern "C" void lexy_encoder_write(tEncoderState* state, float* input_buffer_lef
             // fetch page from ogg
             while(ogg_stream_pageout(&state->os, &og) || (state->op.e_o_s && ogg_stream_flush(&state->os, &og)))
             {
+#if DEBUG
                 printf("lexy_encoder_write(); writing ogg samples page after packet %i\n", num_packets);
+#endif
                 write_page(state, &og);
             }
         }
@@ -140,7 +145,9 @@ extern "C" void lexy_encoder_write(tEncoderState* state, float* input_buffer_lef
 // finish encoding
 extern "C" void lexy_encoder_finish(tEncoderState* state)
 {
+#if DEBUG
     printf("lexy_encoder_finish(); ending stream\n");
+#endif
     
     // write an end-of-stream packet
     vorbis_analysis_wrote(&state->vd, 0);
@@ -161,8 +168,10 @@ extern "C" void lexy_encoder_finish(tEncoderState* state)
         }
     }
     
+#if DEBUG
     printf("lexy_encoder_finish(); final encoded stream length: %i bytes\n", state->encoded_length);
     printf("lexy_encoder_finish(); cleaning up\n");
+#endif
     
     ogg_stream_clear(&state->os);
     vorbis_block_clear(&state->vb);
@@ -182,6 +191,7 @@ extern "C" int lexy_get_buffer_length(tEncoderState* state)
     return state->encoded_length;
 }
 
+#if DEBUG
 // complete encoder test: init, encode, shutdown.
 extern "C" tEncoderState* lexy_test()
 {
@@ -231,3 +241,4 @@ extern "C" int main()
 
     return 0;
 }
+#endif
