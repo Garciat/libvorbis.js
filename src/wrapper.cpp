@@ -24,6 +24,9 @@ struct tEncoderState
   int sample_rate;
   int granulepos;
   
+  int input_num_samples;
+  float **input_buffer;
+  
   std::vector<unsigned char> output_buffer;
 };
 
@@ -94,17 +97,26 @@ extern "C" tEncoderState* lexy_encoder_start(int sample_rate = 48000, float vbr_
     return state;
 }
 
-// input should be more than 10ms long
-extern "C" void lexy_encoder_write(tEncoderState* state, float* input_buffer_left, float* input_buffer_right, int num_samples)
+extern "C" void lexy_request_input_buffer(tEncoderState* state, int num_samples)
 {
-    // get space in which to copy uncompressed data
-    float** buffer = vorbis_analysis_buffer(&state->vd, num_samples);
+    state->input_buffer = vorbis_analysis_buffer(&state->vd, num_samples);
+    state->input_num_samples = num_samples;
+}
 
-    // write uncompressed data
-    memcpy(buffer[0], input_buffer_left,  num_samples * sizeof(float));
-    memcpy(buffer[1], input_buffer_right, num_samples * sizeof(float));
+extern "C" float* lexy_get_left_input_buffer(tEncoderState* state)
+{
+    return state->input_buffer[0];
+}
 
-    vorbis_analysis_wrote(&state->vd, num_samples);
+extern "C" float* lexy_get_right_input_buffer(tEncoderState* state)
+{
+    return state->input_buffer[1];
+}
+
+// input should be more than 10ms long
+extern "C" void lexy_encode(tEncoderState* state)
+{
+    vorbis_analysis_wrote(&state->vd, state->input_num_samples);
 
     ogg_page og;    
     int num_packets = 0;
