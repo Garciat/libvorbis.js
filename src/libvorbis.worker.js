@@ -4,7 +4,14 @@
   var state = null;
   
   handleRequestOnce('config', function (config) {
-    self.Module = config;
+    self.Module = {
+      locateFile: function (file) {
+        switch (file) {
+        case 'libvorbis.module.min.js.mem':
+          return config.memoryInitializerURL;
+        }
+      }
+    };
     
     importScripts(config.moduleURL);
   });

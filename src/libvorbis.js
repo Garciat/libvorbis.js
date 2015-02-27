@@ -4,8 +4,8 @@ var Vorbis = (function () {
   
   var config = {
     workerURL: 'libvorbis.worker.js',
-    moduleURL: 'libvorbis.module.js',
-    memoryInitializerPrefixURL: ''
+    moduleURL: 'libvorbis.module.min.js',
+    memoryInitializerURL: 'libvorbis.module.min.js.mem'
   };
   
   function VorbisEncoderVBR() {
