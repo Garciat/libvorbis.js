@@ -1,5 +1,7 @@
 # libvorbis.js
 
+## Credit
+
 This combines work from [Alex Barkan](http://hotcashew.com/2014/02/chrome-audio-api-and-ogg-vorbis/) ( vorbis.cpp ) and effort from  [Salehen Rahman](https://github.com/shovon/libvorbis.js) who, in turn, forked, Devon Govett's [original repo](https://github.com/devongovett/ogg.js)
 
 ## What it is
@@ -23,42 +25,51 @@ git submodule update
 ./build.sh
 ```
 
-## API
+## Usage
 
-Currently the API is quite limited.
-Lower-level (direct libvorbis API access) as well as higher-level (JS class wrapper)
-will soon be provided. Stay tuned.
+See [demo](demo).
+
+## API
 
 (types added for descriptive purposes)
 
 ```csharp
-using StateHandle = int;
+// access to emscripten Module object
+// e.g. Vorbis.module.HEAP is the program memory buffer
+Vorbis.module
 
-StateHandle Vorbis.init(int sampleRate, float quality);
+using EncoderInstance = int;
+using Pointer = int;
 
-void Vorbis.encode(StateHandle state, Float32Array leftBuffer, Float32Array rightBuffer);
+// Creates a new encoder instance
+// quality from -0.1 to 1.0
+EncoderInstance Vorbis.encoder_create_vbr(int channels, int sampleRate, float quality);
 
-Uint8Array Vorbis.finish(StateHandle state);
+// Writes initial vorbis headers to output data buffer
+void Vorbis.encoder_write_headers(EncoderInstance state);
+
+// Prepares vorbis encoding analysis buffers for the number of samples
+void Vorbis.encoder_prepare_analysis_buffers(EncoderInstance state, int samples);
+
+// Gets the analysis buffer for the specified channel
+Pointer Vorbis.encoder_get_analysis_buffer(EncoderInstance state, int channel);
+
+// Encodes data from the analysis buffers and writes to output data buffer
+void Vorbis.encoder_encode(EncoderInstance state);
+
+// Gets output data buffer
+Pointer Vorbis.encoder_get_data(EncoderInstance state);
+
+// Returns size of output data buffer
+long Vorbis.encoder_get_data_len(EncoderInstance state);
+
+// Clears output data buffer
+void Vorbis.encoder_clear_data(EncoderInstance state);
+
+// Signals the encoder that we are done
+// The encoder may write additional data to the output data buffer
+void Vorbis.encoder_finish(EncoderInstance state);
+
+// Frees all data related to the encoder
+void Vorbis.encoder_destroy(EncoderInstance state);
 ```
-
-## MIT License
-
-Copyright (c) 2014 Joe Sullivan, Gabriel Garcia
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
