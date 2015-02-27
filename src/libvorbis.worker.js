@@ -10,10 +10,16 @@
         case 'libvorbis.module.min.js.mem':
           return config.memoryInitializerURL;
         }
+      },
+      onRuntimeInitialized: function () {
+        // manually reply to request
+        sendMessage('config');
       }
     };
     
     importScripts(config.moduleURL);
+    
+    return NO_RESPONSE;
   });
   
   handleRequestOnce('init', function (options) {
@@ -50,7 +56,7 @@
     var data = Module.lib.helpers.get_data(state);
     
     if (data.length === 0) {
-      return NO_RESPONSE;
+      return null;
     }
     
     Module.lib.encoder_clear_data(state);
@@ -87,7 +93,7 @@
         var response = func(request);
         
         if (response === NO_RESPONSE) {
-          sendMessage(type);
+          // do nothing
         } else {
           sendMessage(type, response);
         }
