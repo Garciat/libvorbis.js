@@ -58,12 +58,14 @@ Pointer Vorbis.encoder_get_analysis_buffer(EncoderInstance state, int channel);
 void Vorbis.encoder_encode(EncoderInstance state);
 
 // Gets output data buffer
+// Note: you should copy the data out (see encoder_clear_data)
 Pointer Vorbis.encoder_get_data(EncoderInstance state);
 
 // Returns size of output data buffer
 long Vorbis.encoder_get_data_len(EncoderInstance state);
 
 // Clears output data buffer
+// Note: this simply tells the encoder to reuse the data buffer
 void Vorbis.encoder_clear_data(EncoderInstance state);
 
 // Signals the encoder that we are done
@@ -72,4 +74,13 @@ void Vorbis.encoder_finish(EncoderInstance state);
 
 // Frees all data related to the encoder
 void Vorbis.encoder_destroy(EncoderInstance state);
+
+// The following helpers are included:
+
+// Encodes an array of buffers (one for each channel)
+void Vorbis.helpers.encode(EncoderInstance state, int samples, Float32Array[] data);
+
+// Returns the output data buffer. Does not call encoder_clear_data.
+// Note: You still need to make a copy of the data (see encoder_get_data)
+Uint8Array Vorbis.helpers.get_data(EncoderInstance state);
 ```
