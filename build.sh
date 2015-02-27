@@ -16,12 +16,16 @@ WRAPPER_INCLUDES="$LIBVORBIS_INCLUDES"
 WRAPPER_SRCS="wrapper.c"
 WRAPPER_OUTDIR=build/wrapper
 
+LIBRARY_SRCDIR=src
+LIBRARY_SRCS="libvorbis.js libvorbis.worker.js"
+LIBRARY_OUTDIR=dist
+
 COMPILE_PREJS=src/pre.js
 COMPILE_POSTJS=src/post.js
-COMPILE_TARGET=libvorbis.js
-COMPILE_TARGET_OPT=libvorbis.min.js
+COMPILE_TARGET=libvorbis.module.js
+COMPILE_TARGET_OPT=libvorbis.module.min.js
 COMPILE_OUTDIR=dist
-COMPILE_FLAGS="-s ALLOW_MEMORY_GROWTH=1 -s ASM_JS=1 -s EXPORTED_FUNCTIONS=@exported_functions.json"
+COMPILE_FLAGS="-s ALLOW_MEMORY_GROWTH=0 -s ASM_JS=1 -s EXPORTED_FUNCTIONS=@exported_functions.json"
 COMPILE_FLAGS="$COMPILE_FLAGS --pre-js $COMPILE_PREJS --post-js $COMPILE_POSTJS"
 COMPILE_FLAGS_OPT="-O3 $COMPILE_FLAGS"
 COMPILE_FLAGS="-O1 $COMPILE_FLAGS"
@@ -35,9 +39,9 @@ echo ":: Compiling libogg..."
 mkdir -p $LIBOGG_OUTDIR
 
 for srcfile in $LIBOGG_SRCS; do
-	buildcmd="$CC $CCFLAGS $LIBOGG_INCLUDES $LIBOGG_SRCDIR/$srcfile -o $LIBOGG_OUTDIR/${srcfile%.*}.bc"
-	echo $buildcmd
-	$buildcmd
+  buildcmd="$CC $CCFLAGS $LIBOGG_INCLUDES $LIBOGG_SRCDIR/$srcfile -o $LIBOGG_OUTDIR/${srcfile%.*}.bc"
+  echo $buildcmd
+  $buildcmd
 done
 
 ### libvorbis
@@ -47,9 +51,9 @@ echo ":: Compiling libvorbis..."
 mkdir -p $LIBVORBIS_OUTDIR
 
 for srcfile in $LIBVORBIS_SRCS; do
-	buildcmd="$CC $CCFLAGS $LIBVORBIS_INCLUDES $LIBVORBIS_SRCDIR/$srcfile -o $LIBVORBIS_OUTDIR/${srcfile%.*}.bc"
-	echo $buildcmd
-	$buildcmd
+  buildcmd="$CC $CCFLAGS $LIBVORBIS_INCLUDES $LIBVORBIS_SRCDIR/$srcfile -o $LIBVORBIS_OUTDIR/${srcfile%.*}.bc"
+  echo $buildcmd
+  $buildcmd
 done
 
 ### wrapper
@@ -59,9 +63,9 @@ echo ":: Compiling wrapper..."
 mkdir -p $WRAPPER_OUTDIR
 
 for srcfile in $WRAPPER_SRCS; do
-	buildcmd="$CC $CCFLAGS $WRAPPER_INCLUDES $WRAPPER_SRCDIR/$srcfile -o $WRAPPER_OUTDIR/${srcfile%.*}.bc"
-	echo $buildcmd
-	$buildcmd
+  buildcmd="$CC $CCFLAGS $WRAPPER_INCLUDES $WRAPPER_SRCDIR/$srcfile -o $WRAPPER_OUTDIR/${srcfile%.*}.bc"
+  echo $buildcmd
+  $buildcmd
 done
 
 ### compile
@@ -83,5 +87,15 @@ echo ":: Compiling target (minified)..."
 buildcmd="$CC $COMPILE_FLAGS_OPT $LIBOGG_BCS $LIBVORBIS_BCS $WRAPPER_BCS -o $COMPILE_OUTDIR/$COMPILE_TARGET_OPT"
 echo $buildcmd
 $buildcmd
+
+### copy library files
+
+echo ":: Copying library files..."
+
+for libfile in $LIBRARY_SRCS; do
+  copycmd="cp $LIBRARY_SRCDIR/$libfile $LIBRARY_OUTDIR"
+  echo $copycmd
+  $copycmd
+done
 
 echo ":: DONE"

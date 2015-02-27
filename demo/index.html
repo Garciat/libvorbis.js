@@ -1,67 +1,133 @@
 <!DOCTYPE html>
-<html ng-app="recorderApp">
+<html>
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <title>Audio Recorder</title>
     
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.7/angular.min.js"></script>
-    
-    <script src="libvorbis.min.js"></script>
-    <script src="js/encoderWAV.js"></script>
-    <script src="js/encoderOGG.js"></script>
-    <script src="js/audio.js"></script>
+    <script src="libvorbis.js"></script>
     
     <script>
+'use strict';
 
-angular
-  .module('recorderApp', []);
-
-angular
-  .module('recorderApp')
-  .controller('MainController', function ($scope, $sce) {
-    var captureControl = null;
+function downloadBlob(url) {
+  return new Promise(function (resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'blob';
     
-    $scope.urls = [];
-    
-    $scope.record = function () {
-      getAudioStream().then(function (stream) {
-        captureControl = beginAudioCapture(stream, 4096 * 2);
-      });
+    xhr.onload = function () {
+      resolve(xhr.response)
     };
     
-    $scope.stop = function () {
-      var data = captureControl.stop();
+    xhr.onerror = reject;
+    
+    xhr.send();
+  });
+}
+
+function getAudioStream() {
+  var getUserMedia  =  navigator.getUserMedia
+                    || navigator.webkitGetUserMedia
+                    || navigator.mozGetUserMedia
+                    || navigator.msGetUserMedia;
+  
+  return new Promise(function (resolve, reject) {
+    getUserMedia.call(navigator, { audio: true }, function (stream) {
+      resolve(stream);
+    }, function (err) {
+      reject(err);
+    });
+  });
+}
+
+function captureOGG(stream, quality) {
+  var bufferSize = 4 * 1024;
+  
+  var audioContext = new AudioContext();
+  var audioSourceNode = audioContext.createMediaStreamSource(stream);
+  var scriptProcessorNode = audioContext.createScriptProcessor(bufferSize);
+  
+  var channels = 2;
+  var sampleRate = audioContext.sampleRate;
+  
+  var encoder =
+    Vorbis.Encoding.createVBR(channels, sampleRate, quality)
+    .then(Vorbis.Encoding.writeHeaders);
+  
+  scriptProcessorNode.onaudioprocess = function (ev) {
+    var inputBuffer = ev.inputBuffer;
+    var samples = inputBuffer.length;
+    
+    var ch0 = inputBuffer.getChannelData(0);
+    var ch1 = inputBuffer.getChannelData(1);
+    
+    // script processor reuses buffers; we need to make copies
+    ch0 = new Float32Array(ch0);
+    ch1 = new Float32Array(ch1);
+    
+    // Float32Array is not Transferrable
+    // so we get the underlying ArrayBuffer
+    var buffers = [ch0.buffer, ch1.buffer];
+    
+    encoder = encoder.then(Vorbis.Encoding.encodeTransfer(samples, buffers));
+  };
+  
+  audioSourceNode.connect(scriptProcessorNode);
+  scriptProcessorNode.connect(audioContext.destination);
+  
+  return new Promise(function (resolve) {
+    stream.onended = function () {
+      audioSourceNode.disconnect(scriptProcessorNode);
+      scriptProcessorNode.disconnect(audioContext.destination);
       
-      var blob = encodeAudioCaptureOGG(data, 0.4);
-      var url = URL.createObjectURL(blob);
+      resolve();
+    };
+  }).then(function () {
+    return encoder.then(Vorbis.Encoding.finish);
+  });
+}
+
+window.addEventListener('load', function () {
+  var record = document.querySelector('#record');
+  var stop = document.querySelector('#stop');
+  
+  var output = document.querySelector('#output');
+  
+  var streamRef = null;
+  
+  record.addEventListener('click', function () {
+    getAudioStream().then(function (stream) {
+      streamRef = stream;
       
-      // Chrome for Android BUG workaround
-      // need to "download" the local blob
-      downloadBlob(url).then(function (blob) {
+      captureOGG(stream, 0.4).then(function (blob) {
         var url = URL.createObjectURL(blob);
         
-        // Angular stuff
-        url = $sce.trustAsResourceUrl(url);
+        var au = document.createElement('audio');
+        au.controls = true;
+        au.src = url;
         
-        $scope.$apply(function () {
-          $scope.urls.push(url);
-        });
+        output.appendChild(au);
       });
-    };
+    });
   });
+  
+  stop.addEventListener('click', function () {
+    streamRef.stop();
+  });
+});
 
     </script>
   </head>
-  <body ng-controller="MainController">
-    <button ng-click="record()">Record</button>
-    <br><br>
-    <button ng-click="stop()">Stop</button>
-    <br><br>
-    <p ng-repeat="url in urls">
-      <audio ng-src="{{url}}" controls></audio>
-      <a href="{{url}}">{{url}}</a>
-    </p>
+  <body>
+    <section>
+      <button id="record">Record</button>
+      <button id="stop">Stop</button>
+    </section>
+    
+    <section id="output">
+      
+    </section>
   </body>
 </html>

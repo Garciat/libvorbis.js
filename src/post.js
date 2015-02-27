@@ -47,6 +47,4 @@ var lib = {
   }
 };
 
-return lib;
-
-})();
+Module.lib = lib;
