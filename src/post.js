@@ -6,7 +6,7 @@ var lib = {
   
   encoder_write_headers: Module.cwrap('encoder_write_headers', null, ['number']),
   
-  encoder_prepare_analysis_buffers: Module.cwrap('encoder_prepare_analysis_buffers', 'number', ['number', 'number', 'number']),
+  encoder_prepare_analysis_buffers: Module.cwrap('encoder_prepare_analysis_buffers', null, ['number', 'number']),
   
   encoder_get_analysis_buffer: Module.cwrap('encoder_get_analysis_buffer', 'number', ['number', 'number']),
   
