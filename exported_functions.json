@@ -1,10 +1,12 @@
 [
-  "_lexy_encoder_start",
-  "_lexy_request_input_buffer",
-  "_lexy_get_left_input_buffer",
-  "_lexy_get_right_input_buffer",
-  "_lexy_encode",
-  "_lexy_encoder_finish",
-  "_lexy_get_buffer_length",
-  "_lexy_get_buffer"
+  "_encoder_create_vbr",
+  "_encoder_write_headers",
+  "_encoder_prepare_analysis_buffers",
+  "_encoder_get_analysis_buffer",
+  "_encoder_encode",
+  "_encoder_get_data",
+  "_encoder_get_data_len",
+  "_encoder_clear_data",
+  "_encoder_finish",
+  "_encoder_destroy"
 ]
