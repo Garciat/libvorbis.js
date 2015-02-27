@@ -1,25 +1,20 @@
 function encodeAudioCaptureOGG(data, quality) {
-  var buffer = new Uint8Array(512 * 1024);
-  var length = 0;
+  var output = [];
   
   function read_data() {
     var data = Vorbis.helpers.get_data(state);
     Vorbis.encoder_clear_data(state);
     
-    var newsize = buffer.length;
-    
-    while (length + data.length > newsize) {
-      newsize *= 2;
+    // The ogg stream has not flushed any data out yet
+    if (data.length === 0) {
+      return;
     }
     
-    if (newsize !== buffer.length) {
-      var newbuf = new Uint8Array(buffer.length * 2);
-      newbuf.set(buffer, 0);
-      buffer = newbuf;
-    }
+    // The data buffer gets reused.
+    // We need to copy the data out.
+    var copy = new Uint8Array(data);
     
-    buffer.set(data, length);
-    length += data.length;
+    output.push(copy);
   }
   
   var state = Vorbis.encoder_create_vbr(2, data.sampleRate, quality);
@@ -37,9 +32,7 @@ function encodeAudioCaptureOGG(data, quality) {
   
   Vorbis.encoder_destroy(state);
   
-  var result = buffer.subarray(0, length);
-  
-  var blob = new Blob([result], { type: 'audio/ogg' });
+  var blob = new Blob(output, { type: 'audio/ogg' });
   
   return blob;
 }
