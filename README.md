@@ -32,7 +32,7 @@ See [demo](demo).
 (types added for descriptive purposes)
 
 ```csharp
-// library options object format (with defaults values)
+// library options object format (with default values)
 object VorbisOptions {
   // location of worker script
   string workerURL = 'libvorbis.worker.js';
