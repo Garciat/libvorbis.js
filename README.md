@@ -23,9 +23,9 @@ git submodule update
 ./build.sh
 ```
 
-## Usage
+## Demos
 
-See [demo](demo).
+[Microphone recorder](http://garciat.com/libvorbis.js/demos/microphone-recorder.html).
 
 ## API
 
@@ -38,9 +38,11 @@ object VorbisOptions {
   string workerURL = 'libvorbis.worker.js';
   
   // location of module script
+  // Note: this is relative to workerURL!
   string moduleURL = 'libvorbis.module.min.js';
   
   // location of memory initializer (for minified build)
+  // Note: this is relative to workerURL!
   string memoryInitializerURL = 'libvorbis.module.min.js.mem';
 }
 
