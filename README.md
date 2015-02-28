@@ -10,9 +10,7 @@ This spits out a javascript file that can be used in the browser to convert PCM 
 
 ## Download
 
-Head over to the [releases](https://github.com/Garciat/libvorbis.js/releases) page
-and download either the development version (libvorbis.js) or the minified "production"
-version (libvorbis.min.js **and** libvorbis.min.js.mem)
+See [releases](https://github.com/Garciat/libvorbis.js/releases).
 
 ## Build
 
