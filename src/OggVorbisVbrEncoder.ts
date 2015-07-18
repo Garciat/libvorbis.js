@@ -1,45 +1,41 @@
-/// <reference path="VbrAsmModule.d.ts" />
+/// <reference path="Emscripten.d.ts" />
+/// <reference path="LibVorbisNative.d.ts" />
+/// <reference path="NativeOggVorbisVbrEncoder.ts" />
 
-module Vorbis {
-    export interface VbrEncoderOptions {
-        /**
-         * The number of channels to encode.
-         */
+module LibVorbis {
+    export interface OggVorbisVbrEncoderOptions {
         channels: number;
-        /**
-         * he sample rate for this encoding session.
-         */
         sampleRate: number;
-        /**
-         * A value between -0.1 and 1.0.
-         */
         quality: number;
         
-        moduleOptions: VorbisAsmJs.VbrAsmModuleOptions;
+        onData: (buffer: ArrayBuffer) => any;
     }
     
-    /**
-     * A wrapper class for the native ASM.JS module for Vorbis VBR encoding.
-     * 
-     * The heavy processing done by this class may cause browser applications
-     * to hang. Instead, use the VbrEncoderClient class which uses Web Workers.
-     */
-    export class VbrEncoder {
-        private module: VorbisAsmJs.VbrAsmModule;
-        private handle: VorbisAsmJs.VbrStateHandle;
+    export class OggVorbisVbrEncoder {
+        private handle: VbrEncoderStateHandle;
         private chunks: ArrayBuffer[];
         private onData: (buffer: ArrayBuffer) => any;
         
-        /**
-         * @params onData (optional) A listener for output data buffers.
-         */
-        constructor(options: VbrEncoderOptions, onData?: (buffer: ArrayBuffer) => any) {
-            this.module = VorbisAsmJs.makeVbrAsmModule(options.moduleOptions);
+        constructor(private module: NativeOggVorbisVbrEncoder, options: OggVorbisVbrEncoderOptions) {
             this.handle = this.module.create(options.channels, options.sampleRate, options.quality);
             this.chunks = [];
-            this.onData = onData || (() => {});
+            this.onData = options.onData || (() => {});
             
             this.module.writeHeaders(this.handle);
+        }
+        
+        static create(moduleOptions: Emscripten.EmscriptenModuleOptions,
+                      encoderOptions: OggVorbisVbrEncoderOptions,
+                      callback: (encoder: OggVorbisVbrEncoder) => any): void {
+            
+            LibVorbisNative.makeRawNativeModule(moduleOptions, (rawModule) => {
+                var module = LibVorbis.NativeOggVorbisVbrEncoder.fromRawNativeModule(rawModule);
+                
+                var encoder = new OggVorbisVbrEncoder(module, encoderOptions);
+                
+                callback(encoder);
+            });
+            
         }
         
         /**
@@ -55,7 +51,7 @@ module Vorbis {
                 var data = channelData[ch];
                 var bufferPtr = this.module.getAnalysisBuffer(this.handle, ch);
                 
-                this.module.HEAPF32.set(data, bufferPtr >> 2);
+                this.module.rawModule.HEAPF32.set(data, bufferPtr >> 2);
             }
             
             this.module.encode(this.handle);
@@ -82,7 +78,7 @@ module Vorbis {
             
             if (dataLength === 0) return;
             
-            var chunk = this.module.HEAP8.subarray(dataPointer, dataPointer + dataLength);
+            var chunk = this.module.rawModule.HEAPU8.subarray(dataPointer, dataPointer + dataLength);
             var data = new Uint8Array(chunk); // copy
             var buffer = data.buffer;
             

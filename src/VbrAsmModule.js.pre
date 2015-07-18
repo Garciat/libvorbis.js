@@ -1,4 +1,0 @@
-var VorbisAsmJs;
-(function (VorbisAsmJs) {
-
-function makeVbrAsmModule(Module) {

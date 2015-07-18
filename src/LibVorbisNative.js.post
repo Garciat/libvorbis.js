@@ -1,0 +1,6 @@
+
+    }
+
+    LibVorbisNative.makeRawNativeModule = makeRawNativeModule;
+
+})(LibVorbisNative || (LibVorbisNative = {}));

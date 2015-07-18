@@ -1,8 +1,6 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
         "noImplicitAny": true,
-        "outDir": "../tsout",
         "target": "ES5",
         "declaration": true
     }

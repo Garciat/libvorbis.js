@@ -5,7 +5,7 @@
 
 #include <vorbis/vorbisenc.h>
 
-#include "wrapper.h"
+#include "NativeOggVorbisVbrEncoder.h"
 
 /* source: https://svn.xiph.org/trunk/vorbis/examples/encoder_example.c */
 

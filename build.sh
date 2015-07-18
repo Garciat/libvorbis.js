@@ -13,21 +13,20 @@ LIBVORBIS_OUTDIR=build/libvorbis
 
 WRAPPER_SRCDIR=src
 WRAPPER_INCLUDES="$LIBVORBIS_INCLUDES"
-WRAPPER_SRCS="wrapper.c"
+WRAPPER_SRCS="NativeOggVorbisVbrEncoder.c"
 WRAPPER_OUTDIR=build/wrapper
 
 LIBRARY_SRCDIR=src
-LIBRARY_SRCS="VbrEncoder.ts VbrEncoderClient.ts VbrEncoderClient.worker.ts"
 LIBRARY_OUTDIR=dist
 
-COMPILE_PREJS=src/VbrAsmModule.js.pre
-COMPILE_POSTJS=src/VbrAsmModule.js.post
-COMPILE_TARGET=VbrAsmModule.js
-COMPILE_TARGET_OPT=VbrAsmModule.min.js
+COMPILE_PREJS=src/LibVorbisNative.js.pre
+COMPILE_POSTJS=src/LibVorbisNative.js.post
+COMPILE_TARGET=LibVorbisNative.js
+COMPILE_TARGET_OPT=LibVorbisNative.min.js
 COMPILE_OUTDIR=dist
 COMPILE_FLAGS="-s ALLOW_MEMORY_GROWTH=0 -s ASM_JS=1 -s EXPORTED_FUNCTIONS=@exported_functions.json"
 COMPILE_FLAGS="$COMPILE_FLAGS --pre-js $COMPILE_PREJS --post-js $COMPILE_POSTJS"
-COMPILE_FLAGS_OPT="-O3 $COMPILE_FLAGS"
+COMPILE_FLAGS_OPT="-s ASSERTIONS=1 -O3 $COMPILE_FLAGS"
 COMPILE_FLAGS="-O1 $COMPILE_FLAGS"
 
 set -e

@@ -1,27 +1,10 @@
-declare module VorbisAsmJs {
-    /**
-     * A pointer to a native Vorbis VBR Encoder state object.
-     */
-    type VbrStateHandle = number;
+// <reference path="Emscripten.d.ts" />
+
+module LibVorbis {
+    export type VbrEncoderStateHandle = number;
     
-    /**
-     * A generic native pointer.
-     */
-    type AsmPointer = number;
-    
-    /**
-     * Native ASM.JS module for Vorbis VBR encoding.
-     */
-    interface VbrAsmModule {
-        /**
-         * The native heap viewed as a Uint8Array.
-         */
-        HEAP8: Uint8Array;
-        
-        /**
-         * The native heap viewed as a Float32Array
-         */
-        HEAPF32: Float32Array;
+    export interface NativeOggVorbisVbrEncoder {
+        rawModule: Emscripten.EmscriptenModule;
         
         /**
          * Creates a new VBR Encoder state object.
@@ -30,7 +13,7 @@ declare module VorbisAsmJs {
          * @param sampleRate The sample rate for this encoding session.
          * @param quality A value between -0.1 and 1.0.
          */
-        create(channels: number, sampleRate: number, quality: number): VbrStateHandle;
+        create(channels: number, sampleRate: number, quality: number): VbrEncoderStateHandle;
         
         /**
          * Writes initial OGG Vorbis headers, including metadata.
@@ -41,7 +24,7 @@ declare module VorbisAsmJs {
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        writeHeaders(handle: VbrStateHandle): void;
+        writeHeaders(handle: VbrEncoderStateHandle): void;
         
         /**
          * A request to the Vorbis encoder to reserve enough space for analysis.
@@ -49,7 +32,7 @@ declare module VorbisAsmJs {
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          * @param samples The number of samples for this analysis step.
          */
-        prepareAnalysisBuffers(handle: VbrStateHandle, samples: number): void;
+        prepareAnalysisBuffers(handle: VbrEncoderStateHandle, samples: number): void;
         
         /**
          * Returns a native pointer to a buffer corresponding to the specified
@@ -58,7 +41,7 @@ declare module VorbisAsmJs {
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          * @param channel The channel (0-indexed).
          */
-        getAnalysisBuffer(handle: VbrStateHandle, channel: number): AsmPointer;
+        getAnalysisBuffer(handle: VbrEncoderStateHandle, channel: number): Emscripten.RawPointer;
         
         /**
          * Performs analysis and encoding on the analysis buffers.
@@ -67,28 +50,28 @@ declare module VorbisAsmJs {
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        encode(handle: VbrStateHandle): void;
+        encode(handle: VbrEncoderStateHandle): void;
         
         /**
          * Returns a native pointer to the output data buffer. 
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        getData(handle: VbrStateHandle): AsmPointer;
+        getData(handle: VbrEncoderStateHandle): Emscripten.RawPointer;
         
         /**
          * Returns the amount of data in the buffer.
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        getDataLength(handle: VbrStateHandle): number;
+        getDataLength(handle: VbrEncoderStateHandle): number;
         
         /**
          * Resets the buffer so it can be reused by the encoder.
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        clearData(handle: VbrStateHandle): void;
+        clearData(handle: VbrEncoderStateHandle): void;
         
         /**
          * Performs finalizing of the OGG Vorbis stream.
@@ -97,27 +80,41 @@ declare module VorbisAsmJs {
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        finish(handle: VbrStateHandle): void;
+        finish(handle: VbrEncoderStateHandle): void;
         
         /**
          * Frees the VBR Encoder state object.
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        destroy(handle: VbrStateHandle): void;
+        destroy(handle: VbrEncoderStateHandle): void;
     }
     
-    interface VbrAsmModuleOptions {
-        /**
-         * URL to the native memory initializer file.
-         * 
-         * This is only needed when using the minified version of the module.
-         */
-        memoryInitializerURL: string;
+    export module NativeOggVorbisVbrEncoder {
+        export function fromRawNativeModule(module: Emscripten.EmscriptenModule): NativeOggVorbisVbrEncoder {
+            return {
+                rawModule: module,
+                
+                create: module.cwrap('encoder_create_vbr', 'number', ['number', 'number', 'number']),
+                
+                writeHeaders: module.cwrap('encoder_write_headers', null, ['number']),
+                
+                prepareAnalysisBuffers: module.cwrap('encoder_prepare_analysis_buffers', null, ['number', 'number']),
+                
+                getAnalysisBuffer: module.cwrap('encoder_get_analysis_buffer', 'number', ['number', 'number']),
+                
+                encode: module.cwrap('encoder_encode', null, ['number']),
+                
+                getData: module.cwrap('encoder_get_data', 'number', ['number']),
+                
+                getDataLength: module.cwrap('encoder_get_data_len', 'number', ['number']),
+                
+                clearData: module.cwrap('encoder_clear_data', null, ['number']),
+                
+                finish: module.cwrap('encoder_finish', null, ['number']),
+                
+                destroy: module.cwrap('encoder_destroy', null, ['number'])
+            };
+        }
     }
-    
-    /**
-     * Creates an instance of the native Vorbis VBR module.
-     */
-    function makeVbrAsmModule(options?: VbrAsmModuleOptions): VbrAsmModule;
 }
