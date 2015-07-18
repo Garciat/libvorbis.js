@@ -22,8 +22,8 @@ LIBRARY_OUTDIR=dist
 
 COMPILE_PREJS=src/VbrAsmModule.js.pre
 COMPILE_POSTJS=src/VbrAsmModule.js.post
-COMPILE_TARGET=libvorbis.VbrAsmModule.js
-COMPILE_TARGET_OPT=libvorbis.VbrAsmModule.min.js
+COMPILE_TARGET=VbrAsmModule.js
+COMPILE_TARGET_OPT=VbrAsmModule.min.js
 COMPILE_OUTDIR=dist
 COMPILE_FLAGS="-s ALLOW_MEMORY_GROWTH=0 -s ASM_JS=1 -s EXPORTED_FUNCTIONS=@exported_functions.json"
 COMPILE_FLAGS="$COMPILE_FLAGS --pre-js $COMPILE_PREJS --post-js $COMPILE_POSTJS"
@@ -90,19 +90,10 @@ $buildcmd
 
 ### copy library files
 
-echo ":: Copying library files..."
+echo ":: Building library files..."
 
-TEMPDIR=`mktemp -d`
-
-buildcmd="tsc --outDir $TEMPDIR -p $LIBRARY_SRCDIR"
+buildcmd="tsc --outDir $LIBRARY_OUTDIR -p $LIBRARY_SRCDIR"
 echo $buildcmd
 $buildcmd
-
-WORKDIR=$PWD
-pushd $TEMPDIR
-for file in $(ls); do
-  cp $file $WORKDIR/$LIBRARY_OUTDIR/libvorbis.$(basename $file)
-done
-popd
 
 echo ":: DONE"
