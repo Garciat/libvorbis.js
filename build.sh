@@ -17,13 +17,13 @@ WRAPPER_SRCS="wrapper.c"
 WRAPPER_OUTDIR=build/wrapper
 
 LIBRARY_SRCDIR=src
-LIBRARY_SRCS="libvorbis.js libvorbis.worker.js"
+LIBRARY_SRCS="VbrEncoder.ts VbrEncoderClient.ts VbrEncoderClient.worker.ts"
 LIBRARY_OUTDIR=dist
 
-COMPILE_PREJS=src/pre.js
-COMPILE_POSTJS=src/post.js
-COMPILE_TARGET=libvorbis.module.js
-COMPILE_TARGET_OPT=libvorbis.module.min.js
+COMPILE_PREJS=src/VbrAsmModule.js.pre
+COMPILE_POSTJS=src/VbrAsmModule.js.post
+COMPILE_TARGET=libvorbis.VbrAsmModule.js
+COMPILE_TARGET_OPT=libvorbis.VbrAsmModule.min.js
 COMPILE_OUTDIR=dist
 COMPILE_FLAGS="-s ALLOW_MEMORY_GROWTH=0 -s ASM_JS=1 -s EXPORTED_FUNCTIONS=@exported_functions.json"
 COMPILE_FLAGS="$COMPILE_FLAGS --pre-js $COMPILE_PREJS --post-js $COMPILE_POSTJS"
@@ -92,10 +92,17 @@ $buildcmd
 
 echo ":: Copying library files..."
 
-for libfile in $LIBRARY_SRCS; do
-  copycmd="cp $LIBRARY_SRCDIR/$libfile $LIBRARY_OUTDIR"
-  echo $copycmd
-  $copycmd
+TEMPDIR=`mktemp -d`
+
+buildcmd="tsc --outDir $TEMPDIR -p $LIBRARY_SRCDIR"
+echo $buildcmd
+$buildcmd
+
+WORKDIR=$PWD
+pushd $TEMPDIR
+for file in $(ls); do
+  cp $file $WORKDIR/$LIBRARY_OUTDIR/libvorbis.$(basename $file)
 done
+popd
 
 echo ":: DONE"

@@ -1,0 +1,27 @@
+
+Module.create = Module.cwrap('encoder_create_vbr', 'number', ['number', 'number', 'number']);
+
+Module.writeHeaders = Module.cwrap('encoder_write_headers', null, ['number']);
+
+Module.prepareAnalysisBuffers = Module.cwrap('encoder_prepare_analysis_buffers', null, ['number', 'number']);
+
+Module.getAnalysisBuffer = Module.cwrap('encoder_get_analysis_buffer', 'number', ['number', 'number']);
+
+Module.encode = Module.cwrap('encoder_encode', null, ['number']);
+
+Module.getData = Module.cwrap('encoder_get_data', 'number', ['number']);
+
+Module.getDataLength = Module.cwrap('encoder_get_data_len', 'number', ['number']);
+
+Module.clearData = Module.cwrap('encoder_clear_data', null, ['number']);
+
+Module.finish = Module.cwrap('encoder_finish', null, ['number']);
+
+Module.destroy = Module.cwrap('encoder_destroy', null, ['number']);
+
+return Module;
+
+}
+
+    VorbisAsmJs.makeVbrAsmModule = makeVbrAsmModule;
+})(VorbisAsmJs || (VorbisAsmJs = {}));
