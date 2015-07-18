@@ -92,7 +92,6 @@ module LibVorbis {
 ## Credits
 
  - [Alex Barkan](http://hotcashew.com/2014/02/chrome-audio-api-and-ogg-vorbis/)
- - [Salehen Rahman](https://github.com/shovon/libvorbis.js)
  - [Devon Govett](https://github.com/devongovett/ogg.js)
  - [Salehen Shovon Rahman](https://github.com/shovon/libvorbis.js)
  - [Jose Sullivan](https://github.com/itsjoesullivan/libvorbis.js)
