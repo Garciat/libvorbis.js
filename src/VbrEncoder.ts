@@ -11,7 +11,7 @@ module Vorbis {
     
     export class VbrEncoder {
         private module: VorbisAsmJs.VbrAsmModule;
-        private handle: VorbisAsmJs.VbrAsmHandle;
+        private handle: VorbisAsmJs.VbrStateHandle;
         private chunks: ArrayBuffer[];
         private onData: (buffer: ArrayBuffer) => any;
         

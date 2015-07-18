@@ -1,5 +1,5 @@
 declare module VorbisAsmJs {
-    type VbrAsmHandle = number;
+    type VbrStateHandle = number;
     type AsmPointer = number;
     
     interface VbrAsmModule {
@@ -7,25 +7,25 @@ declare module VorbisAsmJs {
         
         HEAPF32: Float32Array;
         
-        create(channels: number, sampleRate: number, quality: number): VbrAsmHandle;
+        create(channels: number, sampleRate: number, quality: number): VbrStateHandle;
         
-        writeHeaders(handle: VbrAsmHandle): void;
+        writeHeaders(handle: VbrStateHandle): void;
         
-        prepareAnalysisBuffers(handle: VbrAsmHandle, samples: number): void;
+        prepareAnalysisBuffers(handle: VbrStateHandle, samples: number): void;
         
-        getAnalysisBuffer(handle: VbrAsmHandle, channel: number): AsmPointer;
+        getAnalysisBuffer(handle: VbrStateHandle, channel: number): AsmPointer;
         
-        encode(handle: VbrAsmHandle): void;
+        encode(handle: VbrStateHandle): void;
         
-        getData(handle: VbrAsmHandle): AsmPointer;
+        getData(handle: VbrStateHandle): AsmPointer;
         
-        getDataLength(handle: VbrAsmHandle): number;
+        getDataLength(handle: VbrStateHandle): number;
         
-        clearData(handle: VbrAsmHandle): void;
+        clearData(handle: VbrStateHandle): void;
         
-        finish(handle: VbrAsmHandle): void;
+        finish(handle: VbrStateHandle): void;
         
-        destroy(handle: VbrAsmHandle): void;
+        destroy(handle: VbrStateHandle): void;
     }
     
     interface VbrAsmModuleOptions {
