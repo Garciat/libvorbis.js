@@ -24,6 +24,10 @@ module LibVorbis {
             this.module.writeHeaders(this.handle);
         }
         
+        /**
+         * Instantiates a new native module and returns the encoder once
+         * the native module is done loading.
+         */
         static create(moduleOptions: Emscripten.EmscriptenModuleOptions,
                       encoderOptions: OggVorbisVbrEncoderOptions,
                       callback: (encoder: OggVorbisVbrEncoder) => any): void {

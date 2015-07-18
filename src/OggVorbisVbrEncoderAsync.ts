@@ -9,16 +9,10 @@ module LibVorbis {
         moduleOptions: Emscripten.EmscriptenModuleOptions;
     }
     
-    /**
-     * Asynchronous counterpart to {VbrEncoder}. Uses Web Workers for processing.
-     */
     export class OggVorbisVbrEncoderAsync {
         private worker: Worker;
         private chunks: ArrayBuffer[];
         
-        /**
-         * @params onData (optional) A listener for output data buffers.
-         */
         constructor(options: OggVorbisVbrEncoderAsyncOptions,
                     private onLoaded: (encoder: OggVorbisVbrEncoderAsync) => any,
                     private onData?: (buffer: ArrayBuffer, encoder: OggVorbisVbrEncoderAsync) => any,

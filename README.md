@@ -28,38 +28,23 @@ git submodule update
 ## API
 
 ```typescript
-declare module Vorbis {
-    interface VbrEncoderOptions {
-        /**
-         * The number of channels to encode.
-         */
+module LibVorbis {
+    interface OggVorbisVbrEncoderOptions {
         channels: number;
-        /**
-         * he sample rate for this encoding session.
-         */
         sampleRate: number;
-        /**
-         * A value between -0.1 and 1.0.
-         */
         quality: number;
-        moduleOptions: VorbisAsmJs.VbrAsmModuleOptions;
+        onData: (buffer: ArrayBuffer) => any;
     }
     
-    /**
-     * A wrapper class for the native ASM.JS module for Vorbis VBR encoding.
-     *
-     * The heavy processing done by this class may cause browser applications
-     * to hang. Instead, use the VbrEncoderClient class which uses Web Workers.
-     */
-    class VbrEncoder {
-        private module;
-        private handle;
-        private chunks;
-        private onData;
+    class OggVorbisVbrEncoder {
         /**
-         * @params onData (optional) A listener for output data buffers.
+         * Instantiates a new native module and returns the encoder once
+         * the native module is done loading.
          */
-        constructor(options: VbrEncoderOptions, onData?: (buffer: ArrayBuffer) => any);
+        static create(moduleOptions: Emscripten.EmscriptenModuleOptions,
+                      encoderOptions: OggVorbisVbrEncoderOptions,
+                      callback: (encoder: OggVorbisVbrEncoder) => any): void;
+        
         /**
          * Performs a encoding step on the provided PCM channel data.
          *
@@ -67,32 +52,25 @@ declare module Vorbis {
          * @param samples The number of samples in each buffer.
          */
         encode(channelData: Float32Array[], samples: number): void;
+        
         /**
          * Finalizes the OGG Vorbis stream, producing an OGG Vorbis audio Blob.
          */
         finish(): Blob;
-        private flush();
     }
     
-    interface VbrEncoderClientOptions {
-        workerUri: string;
-        moduleUri: string;
-        encoderUri: string;
-        encoderOptions: VbrEncoderOptions;
+    interface OggVorbisVbrEncoderAsyncOptions {
+        libraryResolver(libraryName: string): string;
+        encoderOptions: OggVorbisVbrEncoderOptions;
+        moduleOptions: Emscripten.EmscriptenModuleOptions;
     }
     
-    /**
-     * Asynchronous counterpart to {VbrEncoder}. Uses Web Workers for processing.
-     */
-    class VbrEncoderClient {
-        private worker;
-        private onData;
-        private onFinished;
-        private chunks;
-        /**
-         * @params onData (optional) A listener for output data buffers.
-         */
-        constructor(options: VbrEncoderClientOptions, onData?: (buffer: ArrayBuffer) => any);
+    class OggVorbisVbrEncoderAsync {
+        constructor(options: OggVorbisVbrEncoderAsyncOptions,
+                    onLoaded: (encoder: OggVorbisVbrEncoderAsync) => any,
+                    onData?: (buffer: ArrayBuffer, encoder: OggVorbisVbrEncoderAsync) => any,
+                    onFinished?: (audio: Blob, encoder: OggVorbisVbrEncoderAsync) => any);
+        
         /**
          * Performs a encoding step on the provided PCM channel data.
          *
@@ -100,13 +78,13 @@ declare module Vorbis {
          * @param samples The number of samples in each buffer.
          */
         encode(channelData: Float32Array[], samples: number): void;
+        
         /**
          * Finalizes the OGG Vorbis stream, producing an OGG Vorbis audio Blob.
          *
          * @param onFinished A callback for the resulting audio Blob.
          */
-        finish(onFinished: (audio: Blob) => any): void;
-        private onMessage;
+        finish(onFinished?: (audio: Blob) => any): void;
     }
 }
 ```
