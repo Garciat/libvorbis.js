@@ -4,6 +4,12 @@
 
 This spits out a javascript file that can be used in the browser to convert PCM audio data to compressed ogg vorbis audio.
 
+## Install
+
+```
+bower install libvorbis.js
+```
+
 ## Download
 
 See [releases](https://github.com/Garciat/libvorbis.js/releases).
