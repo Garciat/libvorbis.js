@@ -1,6 +1,8 @@
 CC=emcc
 CCFLAGS="-O3 -ffast-math -Iinclude"
 
+TARGET_DIR=dist
+
 LIBOGG_SRCDIR=libogg/src
 LIBOGG_INCLUDES="-I$LIBOGG_SRCDIR -Ilibogg/include"
 LIBOGG_SRCS="bitwise.c framing.c"
@@ -17,16 +19,16 @@ WRAPPER_SRCS="NativeOggVorbisVbrEncoder.c"
 WRAPPER_OUTDIR=build/wrapper
 
 LIBRARY_SRCDIR=src
-LIBRARY_OUTDIR=dist
+LIBRARY_OUTDIR=build/lib
 
 COMPILE_PREJS=src/LibVorbisNative.js.pre
 COMPILE_POSTJS=src/LibVorbisNative.js.post
 COMPILE_TARGET=LibVorbisNative.js
 COMPILE_TARGET_OPT=LibVorbisNative.min.js
-COMPILE_OUTDIR=dist
+COMPILE_OUTDIR=$TARGET_DIR
 COMPILE_FLAGS="-s ALLOW_MEMORY_GROWTH=0 -s ASM_JS=1 -s EXPORTED_FUNCTIONS=@exported_functions.json"
 COMPILE_FLAGS="$COMPILE_FLAGS --pre-js $COMPILE_PREJS --post-js $COMPILE_POSTJS"
-COMPILE_FLAGS_OPT="-s ASSERTIONS=1 -O3 $COMPILE_FLAGS"
+COMPILE_FLAGS_OPT="-O3 $COMPILE_FLAGS"
 COMPILE_FLAGS="-O1 $COMPILE_FLAGS"
 
 set -e
@@ -87,12 +89,20 @@ buildcmd="$CC $COMPILE_FLAGS_OPT $LIBOGG_BCS $LIBVORBIS_BCS $WRAPPER_BCS -o $COM
 echo $buildcmd
 $buildcmd
 
-### copy library files
+### build library
 
 echo ":: Building library files..."
 
+mkdir -p $LIBRARY_OUTDIR
 buildcmd="tsc --outDir $LIBRARY_OUTDIR -p $LIBRARY_SRCDIR"
 echo $buildcmd
 $buildcmd
+
+for jsfile in $(ls $LIBRARY_OUTDIR | grep .js); do
+  cat $LIBRARY_OUTDIR/$jsfile | uglifyjs > $LIBRARY_OUTDIR/${jsfile%.js}.min.js
+done
+
+cp $LIBRARY_OUTDIR/* $TARGET_DIR
+find $LIBRARY_SRCDIR -name \*.d.ts -exec cp {} $TARGET_DIR \;
 
 echo ":: DONE"

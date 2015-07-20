@@ -12,7 +12,8 @@ See [releases](https://github.com/Garciat/libvorbis.js/releases).
 
 **Requirements**
 - emscripten compiler
-- TypeScript 1.5 compiler
+- TypeScript 1.5+ compiler (`npm install -g typescript`)
+- uglifyjs (`npm install -g uglifyjs`)
 
 **Instructions**
 ```bash
