@@ -8,7 +8,7 @@ module LibVorbis {
         sampleRate: number;
         quality: number;
         
-        onData: (buffer: ArrayBuffer) => any;
+        onData?: (buffer: ArrayBuffer) => any;
     }
     
     export class OggVorbisVbrEncoder {
