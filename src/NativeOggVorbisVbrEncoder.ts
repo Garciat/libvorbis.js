@@ -1,4 +1,4 @@
-// <reference path="Emscripten.d.ts" />
+/// <reference path="Emscripten.d.ts" />
 
 module LibVorbis {
     export type VbrEncoderStateHandle = number;
