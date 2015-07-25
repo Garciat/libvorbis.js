@@ -46,7 +46,7 @@ module LibVorbis {
          * @param samples The number of samples in each buffer.
          */
         encode(channelData: Float32Array[], samples: number): void {
-            var buffers = channelData.map((b: any) => <ArrayBuffer> b.buffer);
+            var buffers = channelData.map(ch => ch.buffer);
             
             var command: EncodeCommand = {
                 kind: 'encode',
