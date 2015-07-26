@@ -2,6 +2,8 @@ CC=emcc
 CCFLAGS="-O3 -ffast-math -Iinclude"
 
 TARGET_DIR=dist
+TARGET_DIR_JS=$TARGET_DIR/js
+TARGET_DIR_TS=$TARGET_DIR/ts
 
 LIBOGG_SRCDIR=libogg/src
 LIBOGG_INCLUDES="-I$LIBOGG_SRCDIR -Ilibogg/include"
@@ -25,7 +27,7 @@ COMPILE_PREJS=src/libvorbis.asmjs.pre
 COMPILE_POSTJS=src/libvorbis.asmjs.post
 COMPILE_TARGET=libvorbis.asmjs.js
 COMPILE_TARGET_OPT=libvorbis.asmjs.min.js
-COMPILE_OUTDIR=$TARGET_DIR
+COMPILE_OUTDIR=$TARGET_DIR_JS
 COMPILE_FLAGS="-s ALLOW_MEMORY_GROWTH=0 -s ASM_JS=1 -s EXPORTED_FUNCTIONS=@exported_functions.json"
 COMPILE_FLAGS="$COMPILE_FLAGS --pre-js $COMPILE_PREJS --post-js $COMPILE_POSTJS"
 COMPILE_FLAGS_OPT="-O3 $COMPILE_FLAGS"
@@ -60,7 +62,7 @@ build_module() {
   
   ### wrapper
   
-  echo ":: Compiling wrapper..."
+  echo ":: Compiling native helpers..."
   
   mkdir -p $WRAPPER_OUTDIR
   
@@ -78,13 +80,13 @@ build_module() {
   
   mkdir -p $COMPILE_OUTDIR
   
-  echo ":: Compiling target..."
+  echo ":: Compiling native module..."
   
   buildcmd="$CC $COMPILE_FLAGS $LIBOGG_BCS $LIBVORBIS_BCS $WRAPPER_BCS -o $COMPILE_OUTDIR/$COMPILE_TARGET"
   echo $buildcmd
   $buildcmd
   
-  echo ":: Compiling target (minified)..."
+  echo ":: Compiling native module (minified)..."
   
   buildcmd="$CC $COMPILE_FLAGS_OPT $LIBOGG_BCS $LIBVORBIS_BCS $WRAPPER_BCS -o $COMPILE_OUTDIR/$COMPILE_TARGET_OPT"
   echo $buildcmd
@@ -99,7 +101,7 @@ build_library() {
   mkdir -p $LIBRARY_OUTDIR
   
   libbuild() {
-    tsc --declaration --out $LIBRARY_OUTDIR/$2.js $LIBRARY_SRCDIR/$1.ts
+    tsc --out $LIBRARY_OUTDIR/$2.js $LIBRARY_SRCDIR/$1.ts
     uglifyjs -o $LIBRARY_OUTDIR/$2.min.js $LIBRARY_OUTDIR/$2.js
   }
   
@@ -107,19 +109,13 @@ build_library() {
   libbuild OggVbrAsyncEncoder libvorbis.oggvbr.asyncencoder
   libbuild OggVbrAsyncEncoderWorker libvorbis.oggvbr.asyncencoder.worker
   
-  cp $LIBRARY_OUTDIR/* $TARGET_DIR
-  find $LIBRARY_SRCDIR -name \*.d.ts -exec cp {} $TARGET_DIR \;
+  mkdir -p $TARGET_DIR_JS
+  mkdir -p $TARGET_DIR_TS
   
-  mkdir -p $TARGET_DIR/typings/libvorbis.js
+  cp $LIBRARY_OUTDIR/* $TARGET_DIR_JS
   
-  for dtsfile in $(find $TARGET_DIR -maxdepth 1 -name \*.d.ts); do
-    dtsfilenew=$TARGET_DIR/typings/libvorbis.js/$(basename $dtsfile)
-    mv $dtsfile $dtsfilenew
-    sed -i -e 's/\.\.\/\.\.\/src\///g' $dtsfilenew
-    sed -i -e 's/\.\.\/typings\///g' $dtsfilenew
-  done
-  
-  cp -r typings/* $TARGET_DIR/typings
+  find $LIBRARY_SRCDIR -name \*.ts -exec cp {} $TARGET_DIR_TS \;
+  cp -r typings $TARGET_DIR
 }
 
 build_all() {
