@@ -31,82 +31,107 @@ COMPILE_FLAGS="$COMPILE_FLAGS --pre-js $COMPILE_PREJS --post-js $COMPILE_POSTJS"
 COMPILE_FLAGS_OPT="-O3 $COMPILE_FLAGS"
 COMPILE_FLAGS="-O1 $COMPILE_FLAGS"
 
-set -e
-
-### libogg
-
-echo ":: Compiling libogg..."
-
-mkdir -p $LIBOGG_OUTDIR
-
-for srcfile in $LIBOGG_SRCS; do
-  buildcmd="$CC $CCFLAGS $LIBOGG_INCLUDES $LIBOGG_SRCDIR/$srcfile -o $LIBOGG_OUTDIR/${srcfile%.*}.bc"
+build_module() {
+  set -e
+  
+  ### libogg
+  
+  echo ":: Compiling libogg..."
+  
+  mkdir -p $LIBOGG_OUTDIR
+  
+  for srcfile in $LIBOGG_SRCS; do
+    buildcmd="$CC $CCFLAGS $LIBOGG_INCLUDES $LIBOGG_SRCDIR/$srcfile -o $LIBOGG_OUTDIR/${srcfile%.*}.bc"
+    echo $buildcmd
+    $buildcmd
+  done
+  
+  ### libvorbis
+  
+  echo ":: Compiling libvorbis..."
+  
+  mkdir -p $LIBVORBIS_OUTDIR
+  
+  for srcfile in $LIBVORBIS_SRCS; do
+    buildcmd="$CC $CCFLAGS $LIBVORBIS_INCLUDES $LIBVORBIS_SRCDIR/$srcfile -o $LIBVORBIS_OUTDIR/${srcfile%.*}.bc"
+    echo $buildcmd
+    $buildcmd
+  done
+  
+  ### wrapper
+  
+  echo ":: Compiling wrapper..."
+  
+  mkdir -p $WRAPPER_OUTDIR
+  
+  for srcfile in $WRAPPER_SRCS; do
+    buildcmd="$CC $CCFLAGS $WRAPPER_INCLUDES $WRAPPER_SRCDIR/$srcfile -o $WRAPPER_OUTDIR/${srcfile%.*}.bc"
+    echo $buildcmd
+    $buildcmd
+  done
+  
+  ### compile
+  
+  LIBOGG_BCS=$LIBOGG_OUTDIR/*.bc
+  LIBVORBIS_BCS=$LIBVORBIS_OUTDIR/*.bc
+  WRAPPER_BCS=$WRAPPER_OUTDIR/*.bc
+  
+  mkdir -p $COMPILE_OUTDIR
+  
+  echo ":: Compiling target..."
+  
+  buildcmd="$CC $COMPILE_FLAGS $LIBOGG_BCS $LIBVORBIS_BCS $WRAPPER_BCS -o $COMPILE_OUTDIR/$COMPILE_TARGET"
   echo $buildcmd
   $buildcmd
-done
-
-### libvorbis
-
-echo ":: Compiling libvorbis..."
-
-mkdir -p $LIBVORBIS_OUTDIR
-
-for srcfile in $LIBVORBIS_SRCS; do
-  buildcmd="$CC $CCFLAGS $LIBVORBIS_INCLUDES $LIBVORBIS_SRCDIR/$srcfile -o $LIBVORBIS_OUTDIR/${srcfile%.*}.bc"
+  
+  echo ":: Compiling target (minified)..."
+  
+  buildcmd="$CC $COMPILE_FLAGS_OPT $LIBOGG_BCS $LIBVORBIS_BCS $WRAPPER_BCS -o $COMPILE_OUTDIR/$COMPILE_TARGET_OPT"
   echo $buildcmd
   $buildcmd
-done
-
-### wrapper
-
-echo ":: Compiling wrapper..."
-
-mkdir -p $WRAPPER_OUTDIR
-
-for srcfile in $WRAPPER_SRCS; do
-  buildcmd="$CC $CCFLAGS $WRAPPER_INCLUDES $WRAPPER_SRCDIR/$srcfile -o $WRAPPER_OUTDIR/${srcfile%.*}.bc"
-  echo $buildcmd
-  $buildcmd
-done
-
-### compile
-
-LIBOGG_BCS=$LIBOGG_OUTDIR/*.bc
-LIBVORBIS_BCS=$LIBVORBIS_OUTDIR/*.bc
-WRAPPER_BCS=$WRAPPER_OUTDIR/*.bc
-
-mkdir -p $COMPILE_OUTDIR
-
-echo ":: Compiling target..."
-
-buildcmd="$CC $COMPILE_FLAGS $LIBOGG_BCS $LIBVORBIS_BCS $WRAPPER_BCS -o $COMPILE_OUTDIR/$COMPILE_TARGET"
-echo $buildcmd
-$buildcmd
-
-echo ":: Compiling target (minified)..."
-
-buildcmd="$CC $COMPILE_FLAGS_OPT $LIBOGG_BCS $LIBVORBIS_BCS $WRAPPER_BCS -o $COMPILE_OUTDIR/$COMPILE_TARGET_OPT"
-echo $buildcmd
-$buildcmd
-
-echo ":: Building library files..."
-
-mkdir -p $LIBRARY_OUTDIR
-
-libbuild() {
-  tsc --out $LIBRARY_OUTDIR/$2.js $LIBRARY_SRCDIR/$1.ts
-  uglifyjs -o $LIBRARY_OUTDIR/$2.min.js $LIBRARY_OUTDIR/$2.js
 }
 
-libbuild OggVbrEncoder libvorbis.oggvbr.encoder
-libbuild OggVbrAsyncEncoder libvorbis.oggvbr.asyncencoder
-libbuild OggVbrAsyncEncoderWorker libvorbis.oggvbr.asyncencoder.worker
+build_library() {
+  set -e
+  
+  echo ":: Building library files..."
+  
+  mkdir -p $LIBRARY_OUTDIR
+  
+  libbuild() {
+    tsc --declaration --out $LIBRARY_OUTDIR/$2.js $LIBRARY_SRCDIR/$1.ts
+    uglifyjs -o $LIBRARY_OUTDIR/$2.min.js $LIBRARY_OUTDIR/$2.js
+  }
+  
+  libbuild OggVbrEncoder libvorbis.oggvbr.encoder
+  libbuild OggVbrAsyncEncoder libvorbis.oggvbr.asyncencoder
+  libbuild OggVbrAsyncEncoderWorker libvorbis.oggvbr.asyncencoder.worker
+  
+  #for jsfile in $(ls $LIBRARY_OUTDIR | grep .js); do
+  #  cat $LIBRARY_OUTDIR/$jsfile | uglifyjs > $LIBRARY_OUTDIR/${jsfile%.js}.min.js
+  #done
+  
+  cp $LIBRARY_OUTDIR/* $TARGET_DIR
+  #find $LIBRARY_SRCDIR -name \*.d.ts -exec cp {} $TARGET_DIR \;
+}
 
-#for jsfile in $(ls $LIBRARY_OUTDIR | grep .js); do
-#  cat $LIBRARY_OUTDIR/$jsfile | uglifyjs > $LIBRARY_OUTDIR/${jsfile%.js}.min.js
-#done
+build_all() {
+  build_module
+  build_library
+}
 
-cp $LIBRARY_OUTDIR/* $TARGET_DIR
-#find $LIBRARY_SRCDIR -name \*.d.ts -exec cp {} $TARGET_DIR \;
-
-echo ":: DONE"
+case $1 in
+  ""|"all")
+  build_all
+  ;;
+  "module")
+  build_module
+  ;;
+  "library")
+  build_library
+  ;;
+  *)
+  echo "unknown option." > /dev/stderr
+  exit 1
+  ;;
+esac
