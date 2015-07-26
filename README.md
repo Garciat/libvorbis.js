@@ -35,63 +35,69 @@ git submodule update
 ## API
 
 ```typescript
-module LibVorbis {
-    interface OggVorbisVbrEncoderOptions {
+declare module libvorbis {
+    interface OggVbrEncoderOptions {
         channels: number;
         sampleRate: number;
         quality: number;
-        onData: (buffer: ArrayBuffer) => any;
     }
     
-    class OggVorbisVbrEncoder {
+    class OggVbrEncoder {
+        constructor(module: OggVbrModule, options: OggVbrEncoderOptions);
+        
+        static create(options: OggVbrEncoderOptions): Promise<OggVbrEncoder>;
+        
         /**
-         * Instantiates a new native module and returns the encoder once
-         * the native module is done loading.
+         * Performs a encoding step on the provided PCM channel data.
+         * It may or may not produce an output ArrayBuffer.
+         *
+         * @param channelData An array of PCM data buffers (one for each channel).
          */
-        static create(moduleOptions: Emscripten.EmscriptenModuleOptions,
-                      encoderOptions: OggVorbisVbrEncoderOptions,
-                      callback: (encoder: OggVorbisVbrEncoder) => any): void;
+        encode(channelData: Float32Array[]): ArrayBuffer;
+        
+        /**
+         * Finalizes the OGG Vorbis stream.
+         * It may or may not produce an output ArrayBuffer.
+         */
+        finish(): ArrayBuffer;
+    }
+    
+    interface OggVbrAsyncEncoderOptions {
+        workerURL: string;
+        moduleURL: string;
+        encoderOptions: OggVbrEncoderOptions;
+    }
+    
+    class OggVbrAsyncEncoder {
+        /**
+         * Call static method create() to instantiate this class!
+         */
+        constructor(worker: Worker, onData: (data: ArrayBuffer) => void, onFinished: () => void);
+        
+        static create(options: OggVbrAsyncEncoderOptions,
+                      onData: (data: ArrayBuffer) => void,
+                      onFinished: () => void): Promise<OggVbrAsyncEncoder>;
         
         /**
          * Performs a encoding step on the provided PCM channel data.
          *
          * @param channelData An array of PCM data buffers (one for each channel).
-         * @param samples The number of samples in each buffer.
          */
-        encode(channelData: Float32Array[], samples: number): void;
-        
-        /**
-         * Finalizes the OGG Vorbis stream, producing an OGG Vorbis audio Blob.
-         */
-        finish(): Blob;
-    }
-    
-    interface OggVorbisVbrEncoderAsyncOptions {
-        libraryResolver(libraryName: string): string;
-        encoderOptions: OggVorbisVbrEncoderOptions;
-        moduleOptions: Emscripten.EmscriptenModuleOptions;
-    }
-    
-    class OggVorbisVbrEncoderAsync {
-        constructor(options: OggVorbisVbrEncoderAsyncOptions,
-                    onLoaded: (encoder: OggVorbisVbrEncoderAsync) => any,
-                    onData?: (buffer: ArrayBuffer, encoder: OggVorbisVbrEncoderAsync) => any,
-                    onFinished?: (audio: Blob, encoder: OggVorbisVbrEncoderAsync) => any);
+        encode(channelData: Float32Array[]): void;
         
         /**
          * Performs a encoding step on the provided PCM channel data.
+         * Warning: passed buffers will be transferred to the Worker, rendering
+         * them unusable from this thread.
          *
          * @param channelData An array of PCM data buffers (one for each channel).
-         * @param samples The number of samples in each buffer.
          */
-        encode(channelData: Float32Array[], samples: number): void;
+        encodeTransfer(channelData: Float32Array[]): void;
         
         /**
-         * Finalizes the OGG Vorbis stream, producing an OGG Vorbis audio Blob.
-         *
-         * @param onFinished A callback for the resulting audio Blob.
+         * Finalizes the OGG Vorbis stream.
          */
-        finish(onFinished?: (audio: Blob) => any): void;
+        finish(): void;
     }
 }
 ```
