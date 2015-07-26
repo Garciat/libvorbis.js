@@ -107,12 +107,19 @@ build_library() {
   libbuild OggVbrAsyncEncoder libvorbis.oggvbr.asyncencoder
   libbuild OggVbrAsyncEncoderWorker libvorbis.oggvbr.asyncencoder.worker
   
-  #for jsfile in $(ls $LIBRARY_OUTDIR | grep .js); do
-  #  cat $LIBRARY_OUTDIR/$jsfile | uglifyjs > $LIBRARY_OUTDIR/${jsfile%.js}.min.js
-  #done
-  
   cp $LIBRARY_OUTDIR/* $TARGET_DIR
-  #find $LIBRARY_SRCDIR -name \*.d.ts -exec cp {} $TARGET_DIR \;
+  find $LIBRARY_SRCDIR -name \*.d.ts -exec cp {} $TARGET_DIR \;
+  
+  mkdir -p $TARGET_DIR/typings/libvorbis.js
+  
+  for dtsfile in $(find $TARGET_DIR -maxdepth 1 -name \*.d.ts); do
+    dtsfilenew=$TARGET_DIR/typings/libvorbis.js/$(basename $dtsfile)
+    mv $dtsfile $dtsfilenew
+    sed -i -e 's/\.\.\/\.\.\/src\///g' $dtsfilenew
+    sed -i -e 's/\.\.\/typings\///g' $dtsfilenew
+  done
+  
+  cp -r typings/* $TARGET_DIR/typings
 }
 
 build_all() {
