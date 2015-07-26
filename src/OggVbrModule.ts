@@ -1,10 +1,10 @@
-/// <reference path="Emscripten.d.ts" />
+/// <reference path="emscripten.d.ts" />
 
-module LibVorbis {
-    export type VbrEncoderStateHandle = number;
+module libvorbis {
+    export type OggVbrEncoderHandle = number;
     
-    export interface NativeOggVorbisVbrEncoder {
-        rawModule: Emscripten.EmscriptenModule;
+    export interface OggVbrModule {
+        rawModule: emscripten.EmscriptenModule;
         
         /**
          * Creates a new VBR Encoder state object.
@@ -13,7 +13,7 @@ module LibVorbis {
          * @param sampleRate The sample rate for this encoding session.
          * @param quality A value between -0.1 and 1.0.
          */
-        create(channels: number, sampleRate: number, quality: number): VbrEncoderStateHandle;
+        create(channels: number, sampleRate: number, quality: number): OggVbrEncoderHandle;
         
         /**
          * Writes initial OGG Vorbis headers, including metadata.
@@ -24,7 +24,7 @@ module LibVorbis {
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        writeHeaders(handle: VbrEncoderStateHandle): void;
+        writeHeaders(handle: OggVbrEncoderHandle): void;
         
         /**
          * A request to the Vorbis encoder to reserve enough space for analysis.
@@ -32,7 +32,7 @@ module LibVorbis {
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          * @param samples The number of samples for this analysis step.
          */
-        prepareAnalysisBuffers(handle: VbrEncoderStateHandle, samples: number): void;
+        prepareAnalysisBuffers(handle: OggVbrEncoderHandle, samples: number): void;
         
         /**
          * Returns a native pointer to a buffer corresponding to the specified
@@ -41,7 +41,7 @@ module LibVorbis {
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          * @param channel The channel (0-indexed).
          */
-        getAnalysisBuffer(handle: VbrEncoderStateHandle, channel: number): Emscripten.RawPointer;
+        getAnalysisBuffer(handle: OggVbrEncoderHandle, channel: number): emscripten.RawPointer;
         
         /**
          * Performs analysis and encoding on the analysis buffers.
@@ -50,28 +50,28 @@ module LibVorbis {
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        encode(handle: VbrEncoderStateHandle): void;
+        encode(handle: OggVbrEncoderHandle): void;
         
         /**
          * Returns a native pointer to the output data buffer. 
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        getData(handle: VbrEncoderStateHandle): Emscripten.RawPointer;
+        getData(handle: OggVbrEncoderHandle): emscripten.RawPointer;
         
         /**
          * Returns the amount of data in the buffer.
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        getDataLength(handle: VbrEncoderStateHandle): number;
+        getDataLength(handle: OggVbrEncoderHandle): number;
         
         /**
          * Resets the buffer so it can be reused by the encoder.
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        clearData(handle: VbrEncoderStateHandle): void;
+        clearData(handle: OggVbrEncoderHandle): void;
         
         /**
          * Performs finalizing of the OGG Vorbis stream.
@@ -80,18 +80,18 @@ module LibVorbis {
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        finish(handle: VbrEncoderStateHandle): void;
+        finish(handle: OggVbrEncoderHandle): void;
         
         /**
          * Frees the VBR Encoder state object.
          * 
          * @param handle A pointer to a native Vorbis VBR Encoder state object.
          */
-        destroy(handle: VbrEncoderStateHandle): void;
+        destroy(handle: OggVbrEncoderHandle): void;
     }
     
-    export module NativeOggVorbisVbrEncoder {
-        export function fromRawNativeModule(module: Emscripten.EmscriptenModule): NativeOggVorbisVbrEncoder {
+    export module OggVbrModule {
+        export function fromRawNativeModule(module: emscripten.EmscriptenModule): OggVbrModule {
             return {
                 rawModule: module,
                 

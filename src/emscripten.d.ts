@@ -1,4 +1,4 @@
-declare module Emscripten {
+declare module emscripten {
     type RawPointer = number;
     
     interface EmscriptenModule {

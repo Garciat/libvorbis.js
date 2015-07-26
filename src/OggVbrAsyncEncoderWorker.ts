@@ -1,46 +1,9 @@
-/// <reference path="OggVorbisVbrEncoder.ts" />
+/// <reference path="OggVbrEncoder.ts" />
+/// <reference path="OggVbrAsyncEncoderMessages.d.ts" />
 
-module LibVorbis {
-    export interface WorkerMessage {
-        kind: string;
-    }
-    
-    export interface LoadedMessage extends WorkerMessage {
-        
-    }
-    
-    export interface DataMessage extends WorkerMessage {
-        buffer: ArrayBuffer;
-    }
-    
-    export interface FinishedMessage extends WorkerMessage {
-        
-    }
-    
-    export interface WorkerCommand {
-        kind: string;
-    }
-    
-    export interface InitCommand extends WorkerCommand {
-        moduleUri: string;
-        nativeEncoderUri: string;
-        encoderUri: string;
-        
-        moduleOptions: Emscripten.EmscriptenModuleOptions;
-        encoderOptions: OggVorbisVbrEncoderOptions;
-    }
-    
-    export interface EncodeCommand extends WorkerCommand {
-        buffers: ArrayBuffer[];
-        samples: number;
-    }
-    
-    export interface FinishCommand extends WorkerCommand {
-        
-    }
-    
-    export class OggVorbisVbrEncoderAsyncWorker {
-        private encoder: OggVorbisVbrEncoder;
+module libvorbis {
+    export class OggVbrAsyncEncoderWorker {
+        private encoder: OggVbrEncoder;
         
         constructor(private channel: Worker) {
             
@@ -50,7 +13,7 @@ module LibVorbis {
             this.channel.addEventListener('message', this.handleChannelMessage);
         }
         
-        private handleEncoderLoaded = (encoder: OggVorbisVbrEncoder): void => {
+        private handleEncoderLoaded = (encoder: OggVbrEncoder): void => {
             this.encoder = encoder;
             
             var message: LoadedMessage = {
@@ -60,31 +23,36 @@ module LibVorbis {
             this.channel.postMessage(message);
         }
         
-        private handleEncoderData = (buffer: ArrayBuffer): void => {
+        private handleEncoderData(buffer: ArrayBuffer): void {
+            if (buffer === null) return;
+            
             var message: DataMessage = {
                 kind: 'data',
-                buffer: buffer
+                data: buffer
             };
             
             this.channel.postMessage(message, [buffer]);
         }
         
         private onInitCommand(command: InitCommand): void {
-            importScripts(command.moduleUri, command.nativeEncoderUri, command.encoderUri);
+            importScripts(command.moduleURL);
             
-            command.encoderOptions.onData = this.handleEncoderData;
-            
-            OggVorbisVbrEncoder.create(command.moduleOptions, command.encoderOptions, this.handleEncoderLoaded);
+            makeRawNativeModule()
+            .then(OggVbrModule.fromRawNativeModule)
+            .then(module => new OggVbrEncoder(module, command.encoderOptions))
+            .then(this.handleEncoderLoaded);
         }
         
         private onEncodeCommand(command: EncodeCommand): void {
             var channelData = command.buffers.map(b => new Float32Array(b));
             
-            this.encoder.encode(channelData, command.samples);
+            var data = this.encoder.encode(channelData);
+            this.handleEncoderData(data);
         }
         
         private onFinishCommand(command: FinishCommand): void {
-            this.encoder.finish();
+            var data = this.encoder.finish();
+            this.handleEncoderData(data);
             
             var message: FinishedMessage = {
                 kind: 'finished'
@@ -111,4 +79,4 @@ module LibVorbis {
     }
 }
 
-new LibVorbis.OggVorbisVbrEncoderAsyncWorker(<any> self).run();
+new libvorbis.OggVbrAsyncEncoderWorker(<any> self).run();

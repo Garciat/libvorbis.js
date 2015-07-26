@@ -1,5 +1,5 @@
-var LibVorbisNative;
-(function (LibVorbisNative) {
+var libvorbis;
+(function (libvorbis) {
     
     function makeRawNativeModule(Module, onLoaded) {
         
