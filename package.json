@@ -9,6 +9,8 @@
     "glob": "^5.0.14",
     "gulp": "^3.9.0",
     "gulp-shell": "^0.4.2",
+    "gulp-typescript": "^2.8.0",
+    "merge-stream": "^0.1.8",
     "mkdirp": "^0.5.1",
     "systemjs-builder": "^0.12.2",
     "through2": "^2.0.0"

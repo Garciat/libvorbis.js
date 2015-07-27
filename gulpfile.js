@@ -3,9 +3,12 @@ var mkdirp  = require('mkdirp');
 var glob    = require('glob');
 var through = require('through2');
 var del     = require('del');
+var Builder = require('systemjs-builder');
+var merge   = require('merge-stream');
 
-var gulp        = require('gulp');
-var shell       = require('gulp-shell');
+var gulp    = require('gulp');
+var shell   = require('gulp-shell');
+var tsc     = require('gulp-typescript');
 
 var CONFIG = {
     cc: 'emcc',
@@ -105,6 +108,23 @@ gulp.task('libvorbis.asmjs.min', ['native'], function (done) {
     });
 });
 
-gulp.task('default', ['libvorbis.asmjs', 'libvorbis.asmjs.min'], function () {
+gulp.task('libvorbis.js.cjs', function () {
+    var proj = tsc.createProject('modules/libvorbis/tsconfig.json');
     
+    var job = proj.src().pipe(tsc(proj));
+    
+    return merge(job.js.pipe(gulp.dest('dist/js/libvorbis')),
+                 job.dts.pipe(gulp.dest('dist/js/libvorbis')));
 });
+
+gulp.task('libvorbis.js', ['libvorbis.js.cjs'], function () {
+    return new Builder({
+        paths: { '*': 'dist/js/*.js' },
+        defaultJSExtensions: true
+    })
+    .build('libvorbis/libvorbis', 'dist/js/libvorbis.js');
+});
+
+gulp.task('all', ['libvorbis.js', 'libvorbis.asmjs', 'libvorbis.asmjs.min']);
+
+gulp.task('default', ['all']);
