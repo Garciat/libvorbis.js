@@ -1,5 +1,5 @@
 CC=emcc
-CCFLAGS="-O3 -ffast-math -Iinclude"
+CCFLAGS="-O3 -ffast-math -Inative/include"
 
 TARGET_DIR=dist
 TARGET_DIR_JS=$TARGET_DIR/js
@@ -15,16 +15,17 @@ LIBVORBIS_INCLUDES="$LIBOGG_INCLUDES -I$LIBVORBIS_SRCDIR -Ilibvorbis/include"
 LIBVORBIS_SRCS="analysis.c bitrate.c block.c codebook.c envelope.c floor0.c floor1.c info.c lookup.c lpc.c lsp.c mapping0.c mdct.c psy.c registry.c res0.c sharedbook.c smallft.c synthesis.c vorbisenc.c window.c"
 LIBVORBIS_OUTDIR=build/libvorbis
 
-WRAPPER_SRCDIR=src/native
+WRAPPER_SRCDIR=native
 WRAPPER_INCLUDES="$LIBVORBIS_INCLUDES"
-WRAPPER_SRCS="ogg_vbr_encoder.c"
-WRAPPER_OUTDIR=build/wrapper
+WRAPPER_SRCS="ogg_vbr/encoder.c"
+WRAPPER_OUTDIR=build/native
 
 LIBRARY_SRCDIR=src
 LIBRARY_OUTDIR=build/lib
 
-COMPILE_PREJS=src/libvorbis.asmjs.pre
-COMPILE_POSTJS=src/libvorbis.asmjs.post
+ASMJS_FILES=modules/libvorbis/src/asmjs
+COMPILE_PREJS=$ASMJS_FILES/prefix.js
+COMPILE_POSTJS=$ASMJS_FILES/suffix.js
 COMPILE_TARGET=libvorbis.asmjs.js
 COMPILE_TARGET_OPT=libvorbis.asmjs.min.js
 COMPILE_OUTDIR=$TARGET_DIR_JS
@@ -67,6 +68,7 @@ build_module() {
   mkdir -p $WRAPPER_OUTDIR
   
   for srcfile in $WRAPPER_SRCS; do
+    mkdir -p $(dirname $WRAPPER_OUTDIR/$srcfile)
     buildcmd="$CC $CCFLAGS $WRAPPER_INCLUDES $WRAPPER_SRCDIR/$srcfile -o $WRAPPER_OUTDIR/${srcfile%.*}.bc"
     echo $buildcmd
     $buildcmd
@@ -76,7 +78,7 @@ build_module() {
   
   LIBOGG_BCS=$LIBOGG_OUTDIR/*.bc
   LIBVORBIS_BCS=$LIBVORBIS_OUTDIR/*.bc
-  WRAPPER_BCS=$WRAPPER_OUTDIR/*.bc
+  WRAPPER_BCS=$(find $WRAPPER_OUTDIR -name *.bc)
   
   mkdir -p $COMPILE_OUTDIR
   

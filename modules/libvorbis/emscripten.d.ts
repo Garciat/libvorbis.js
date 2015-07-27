@@ -1,5 +1,5 @@
 declare module emscripten {
-    type RawPointer = number;
+    type IntPtr = number;
     
     interface EmscriptenModule {
         buffer: ArrayBuffer;
