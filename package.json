@@ -1,0 +1,27 @@
+{
+  "name": "libvorbis.js",
+  "version": "0.0.0",
+  "description": "## What it is",
+  "main": "gulpfile.js",
+  "dependencies": {},
+  "devDependencies": {
+    "del": "^1.2.0",
+    "glob": "^5.0.14",
+    "gulp": "^3.9.0",
+    "gulp-shell": "^0.4.2",
+    "mkdirp": "^0.5.1",
+    "systemjs-builder": "^0.12.2",
+    "through2": "^2.0.0"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Garciat/libvorbis.js.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Garciat/libvorbis.js/issues"
+  },
+  "homepage": "https://github.com/Garciat/libvorbis.js#readme"
+}
