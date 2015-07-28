@@ -1,10 +1,13 @@
+var fs      = require('fs');
 var path    = require('path');
+
 var mkdirp  = require('mkdirp');
 var glob    = require('glob');
 var through = require('through2');
 var del     = require('del');
 var Builder = require('systemjs-builder');
 var merge   = require('merge-stream');
+var temp    = require('temp');
 
 var gulp    = require('gulp');
 var shell   = require('gulp-shell');
@@ -74,12 +77,28 @@ gulp.task('amsjs_ogg_vbr', function () {
 gulp.task('asmjs_modules', ['amsjs_libogg', 'amsjs_libvorbis', 'amsjs_ogg_vbr']);
 
 function compileModule(flags, dest, done) {
+    var exports = [
+        "_encoder_create_vbr",
+        "_encoder_write_headers",
+        "_encoder_prepare_analysis_buffers",
+        "_encoder_get_analysis_buffer",
+        "_encoder_encode",
+        "_encoder_get_data",
+        "_encoder_get_data_len",
+        "_encoder_clear_data",
+        "_encoder_finish",
+        "_encoder_destroy"
+    ];
+    
+    var exports_json = temp.path({ suffix: '.json' });
+    fs.writeFileSync(exports_json, JSON.stringify(exports));
+    
     glob('build/**/*.bc', function (err, files) {
         var bcs = files.join(' ');
         
         var cmd = [CONFIG.cc, flags,
                    '-s ALLOW_MEMORY_GROWTH=0 -s ASM_JS=1',
-                   '-s EXPORTED_FUNCTIONS=@exported_functions.json',
+                   '-s EXPORTED_FUNCTIONS=@' + exports_json,
                    '--pre-js modules/libvorbis/src/asmjs/prefix.js',
                    '--post-js modules/libvorbis/src/asmjs/suffix.js',
                    bcs, '-o', dest].join(' ');

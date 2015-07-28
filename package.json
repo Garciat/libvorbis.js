@@ -13,6 +13,7 @@
     "merge-stream": "^0.1.8",
     "mkdirp": "^0.5.1",
     "systemjs-builder": "^0.12.2",
+    "temp": "^0.8.3",
     "through2": "^2.0.0"
   },
   "scripts": {},
