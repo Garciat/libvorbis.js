@@ -1,6 +1,6 @@
 [submodule "libogg"]
-	path = libogg
+	path = native/libogg
 	url = git://git.xiph.org/mirrors/ogg.git
 [submodule "libvorbis"]
-	path = libvorbis
+	path = native/libvorbis
 	url = git://git.xiph.org/mirrors/vorbis.git

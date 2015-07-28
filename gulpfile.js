@@ -45,18 +45,18 @@ gulp.task('clean', function () {
 
 gulp.task('amsjs_libogg', function () {
     return compile({
-        flags: '-Ilibogg/src -Ilibogg/include',
+        flags: '-Inative/libogg/src -Inative/libogg/include',
         outDir: 'build/libogg',
-        srcDir: 'libogg/src',
+        srcDir: 'native/libogg/src',
         src: ['bitwise.c', 'framing.c']
     });
 });
 
 gulp.task('amsjs_libvorbis', function () {
     return compile({
-        flags: '-Ilibogg/src -Ilibogg/include -Ilibvorbis/lib -Ilibvorbis/include',
+        flags: '-Inative/libogg/src -Inative/libogg/include -Inative/libvorbis/lib -Inative/libvorbis/include',
         outDir: 'build/libvorbis',
-        srcDir: 'libvorbis/lib',
+        srcDir: 'native/libvorbis/lib',
         src: ["analysis.c", "bitrate.c", "block.c", "codebook.c", "envelope.c",
               "floor0.c", "floor1.c", "info.c", "lookup.c", "lpc.c", "lsp.c",
               "mapping0.c", "mdct.c", "psy.c", "registry.c", "res0.c",
@@ -67,7 +67,7 @@ gulp.task('amsjs_libvorbis', function () {
 
 gulp.task('amsjs_ogg_vbr', function () {
     return compile({
-        flags: '-Ilibogg/src -Ilibogg/include -Ilibvorbis/lib -Ilibvorbis/include',
+        flags: '-Inative/libogg/src -Inative/libogg/include -Inative/libvorbis/lib -Inative/libvorbis/include',
         outDir: 'build/native/ogg_vbr',
         srcDir: 'native/ogg_vbr',
         src: ['encoder.c']
