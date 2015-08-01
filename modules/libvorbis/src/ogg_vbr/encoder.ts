@@ -1,6 +1,7 @@
 /// <reference path="../../globals.d.ts" />
 
 import { OggVbrModule, OggVbrEncoderHandle } from './module';
+import { makeRawNativeModule } from 'libvorbis/asmjs';
 
 export interface OggVbrEncoderOptions {
     channels: number;
@@ -17,7 +18,7 @@ export class OggVbrEncoder {
     }
     
     static create(options: OggVbrEncoderOptions) {
-        return libvorbis.makeRawNativeModule()
+        return makeRawNativeModule()
                 .then(OggVbrModule.fromRawNativeModule)
                 .then(module => new OggVbrEncoder(module, options));
     }

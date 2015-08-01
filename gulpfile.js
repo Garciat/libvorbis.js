@@ -101,9 +101,8 @@ function compileModule(flags, dest, done) {
                    '-s EXPORTED_FUNCTIONS=@' + exports_json,
                    '--pre-js modules/libvorbis/src/asmjs/prefix.js',
                    '--post-js modules/libvorbis/src/asmjs/suffix.js',
+                   '--memory-init-file 0',
                    bcs, '-o', dest].join(' ');
-        
-        mkdirp.sync('dist/js');
         
         gulp.src('gulpfile.js') // we just need a file to run the command once
             .pipe(shell(cmd))
@@ -112,11 +111,15 @@ function compileModule(flags, dest, done) {
 }
 
 gulp.task('asmjs', ['asmjs_modules'], function (done) {
-    compileModule('-O1', 'dist/js/libvorbis.asmjs.js', done);
+    mkdirp.sync('dist/cjs');
+    
+    compileModule('-O1', 'dist/cjs/libvorbis/asmjs.js', done);
 });
 
 gulp.task('asmjs.min', ['asmjs_modules'], function (done) {
-    compileModule('-O3', 'dist/js/libvorbis.asmjs.min.js', done);
+    mkdirp.sync('dist/cjs');
+    
+    compileModule('-O3', 'dist/cjs/libvorbis/asmjs.min.js', done);
 });
 
 gulp.task('libvorbis.js.cjs', function () {
@@ -128,14 +131,16 @@ gulp.task('libvorbis.js.cjs', function () {
                  job.dts.pipe(gulp.dest('dist/dts/libvorbis')));
 });
 
-gulp.task('libvorbis.js', ['libvorbis.js.cjs'], function () {
+gulp.task('libvorbis.js.sjs', ['libvorbis.js.cjs', 'asmjs'], function () {
+    mkdirp.sync('dist/sjs');
+    
     return new Builder({
         paths: { '*': 'dist/cjs/*.js' },
         defaultJSExtensions: true
     })
-    .build('libvorbis/libvorbis', 'dist/js/libvorbis.js');
+    .build('libvorbis/libvorbis', 'dist/sjs/libvorbis.js');
 });
 
-gulp.task('all', ['libvorbis.js', 'asmjs', 'asmjs.min']);
+gulp.task('all', ['libvorbis.js.sjs']);
 
 gulp.task('default', ['all']);
