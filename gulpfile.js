@@ -122,7 +122,7 @@ gulp.task('asmjs.min', ['asmjs_modules'], function (done) {
     compileModule('-O3', 'dist/cjs/libvorbis/asmjs.min.js', done);
 });
 
-gulp.task('libvorbis.js.cjs', function () {
+gulp.task('library', function () {
     var proj = tsc.createProject('modules/libvorbis/tsconfig.json');
     
     var job = proj.src().pipe(tsc(proj));
@@ -131,7 +131,7 @@ gulp.task('libvorbis.js.cjs', function () {
                  job.dts.pipe(gulp.dest('dist/dts/libvorbis')));
 });
 
-gulp.task('libvorbis.js.sjs', ['libvorbis.js.cjs', 'asmjs'], function () {
+gulp.task('library.systemjs', ['library', 'asmjs'], function () {
     mkdirp.sync('dist/sjs');
     
     return new Builder({
@@ -141,6 +141,6 @@ gulp.task('libvorbis.js.sjs', ['libvorbis.js.cjs', 'asmjs'], function () {
     .build('libvorbis/libvorbis', 'dist/sjs/libvorbis.js');
 });
 
-gulp.task('all', ['libvorbis.js.sjs']);
+gulp.task('all', ['library.systemjs']);
 
 gulp.task('default', ['all']);
