@@ -12,6 +12,7 @@ var temp    = require('temp');
 var gulp    = require('gulp');
 var shell   = require('gulp-shell');
 var tsc     = require('gulp-typescript');
+var wrap    = require('gulp-wrap');
 
 var CONFIG = {
     cc: 'emcc',
@@ -99,9 +100,8 @@ function compileModule(flags, dest, done) {
         var cmd = [CONFIG.cc, flags,
                    '-s ALLOW_MEMORY_GROWTH=0 -s ASM_JS=1',
                    '-s EXPORTED_FUNCTIONS=@' + exports_json,
-                   '--pre-js modules/libvorbis/src/asmjs/prefix.js',
-                   '--post-js modules/libvorbis/src/asmjs/suffix.js',
                    '--memory-init-file 0',
+                   '--closure 0 --minify 0',
                    bcs, '-o', dest].join(' ');
         
         gulp.src('gulpfile.js') // we just need a file to run the command once
@@ -110,16 +110,22 @@ function compileModule(flags, dest, done) {
     });
 }
 
-gulp.task('asmjs', ['asmjs_modules'], function (done) {
-    mkdirp.sync('dist/cjs');
+gulp.task('asmjs.raw', ['asmjs_modules'], function (done) {
+    mkdirp.sync('dist/js/libvorbis/raw');
     
-    compileModule('-O1', 'dist/cjs/libvorbis/asmjs.js', done);
+    compileModule('-O3', 'dist/js/libvorbis/raw/asmjs.js', done);
 });
 
-gulp.task('asmjs.min', ['asmjs_modules'], function (done) {
-    mkdirp.sync('dist/cjs');
-    
-    compileModule('-O3', 'dist/cjs/libvorbis/asmjs.min.js', done);
+gulp.task('asmjs', ['asmjs.raw'], function () {
+    return gulp.src('dist/js/libvorbis/raw/asmjs.js')
+               .pipe(wrap({ src: 'modules/libvorbis/asmjs/async_wrap.js' }))
+               .pipe(gulp.dest('dist/js/libvorbis'));
+});
+
+gulp.task('asmjs.cjs', ['asmjs'], function () {
+    return gulp.src('dist/js/libvorbis/asmjs.js')
+               .pipe(wrap({ src: 'modules/libvorbis/asmjs/cjs_wrap.js' }))
+               .pipe(gulp.dest('dist/cjs/libvorbis'));
 });
 
 gulp.task('library', function () {
@@ -135,12 +141,20 @@ gulp.task('library.systemjs', ['library', 'asmjs'], function () {
     mkdirp.sync('dist/sjs');
     
     return new Builder({
-        paths: { '*': 'dist/cjs/*.js' },
-        defaultJSExtensions: true
+        paths: {
+            '*': 'dist/cjs/*.js',
+            'libvorbis/asmjs': 'dist/js/libvorbis/asmjs.js'
+        },
+        defaultJSExtensions: true,
+        meta: {
+            'libvorbis/asmjs': {
+                format: 'global'
+            }
+        }
     })
     .build('libvorbis/libvorbis', 'dist/sjs/libvorbis.js');
 });
 
-gulp.task('all', ['library.systemjs']);
+gulp.task('all', ['library.systemjs', 'asmjs.cjs']);
 
 gulp.task('default', ['all']);
