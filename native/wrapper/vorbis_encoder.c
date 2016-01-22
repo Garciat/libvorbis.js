@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include <vorbis/vorbisenc.h>
-
-#include "ogg_vbr_encoder.h"
+#include "vorbis_encoder.h"
 
 /* source: https://svn.xiph.org/trunk/vorbis/examples/encoder_example.c */
 
