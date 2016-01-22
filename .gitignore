@@ -2,3 +2,4 @@
 /dist/
 /typings/
 /.vscode/
+*.o
