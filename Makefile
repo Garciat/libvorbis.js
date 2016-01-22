@@ -17,7 +17,7 @@ VORBIS_OBJ=$(VORBIS_PRE)/lib/libvorbis.a
 VORBISENC_OBJ=$(VORBIS_PRE)/lib/libvorbisenc.a
 
 WRAPPER_DIR=$(NATIVE_DIR)/wrapper
-WRAPPER_OBJ=$(WRAPPER_DIR)/vorbis_encoder.o
+WRAPPER_OBJ=$(OUTPUT_DIR)/vorbis_encoder.o
 
 VORBIS_ENCODER=$(OUTPUT_DIR)/vorbis_encoder.js
 
