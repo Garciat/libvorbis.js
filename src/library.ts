@@ -92,8 +92,6 @@ class VorbisWorkerScript {
         self.addEventListener('message', (ev) => {
             const data = ev.data;
             
-            console.log('worker', data);
-            
             switch (data.type) {
             case 'init':
                 importScripts(data.encoderURL);
@@ -246,7 +244,7 @@ class VorbisMediaRecorder {
     }
     
     set onstart(value: EventListener) {
-        this._onstart = value;
+        this._onstart = value || noop;
     }
     
     get ondataavailable(): BlobEventListener {
@@ -254,7 +252,7 @@ class VorbisMediaRecorder {
     }
     
     set ondataavailable(value: BlobEventListener) {
-        this._ondataavailable = value;
+        this._ondataavailable = value || noop;
     }
     
     get onstop(): EventListener {
@@ -262,7 +260,7 @@ class VorbisMediaRecorder {
     }
     
     set onstop(value: EventListener) {
-        this._onstop = value;
+        this._onstop = value || noop;
     }
     
     start(timeslice?: number) {
@@ -315,8 +313,6 @@ class VorbisMediaRecorder {
     
     private handleEncoderMessage(ev: MessageEvent) {
         const data = ev.data;
-        
-        console.log('MediaRecorder', data);
         
         switch (data.type) {
         case 'load':
