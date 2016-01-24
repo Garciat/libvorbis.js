@@ -86,11 +86,11 @@
         
         var sampleRate = audioBuffer.sampleRate;
         
-        var chunkSize = sampleRate * 1;
+        var chunkSize = 10 * 4096;
         
         console.time('encode');
         
-        encoder.init(channels, sampleRate, 1.0);
+        encoder.init(channels, sampleRate, 0.5);
         
         var ctx = new AudioContext();
         
