@@ -35,8 +35,8 @@
         
         var chunks = [];
         
-        encoder.ondata = (ev) => {
-            chunks.push(ev.data);
+        encoder.ondata = (data) => {
+            chunks.push(data);
         };
         
         encoder.onfinish = () => {

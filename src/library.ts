@@ -2,41 +2,8 @@
 /// <reference path="../typings/webaudioapi/waa.d.ts" />
 /// <reference path="../typings/es6-promise/es6-promise.d.ts" />
 
+/// <reference path="MediaRecorder.d.ts" />
 /// <reference path="vorbis_encoder.d.ts" />
-
-enum RecordingState {
-    "inactive",
-    "recording",
-    "paused"
-}
-
-class BlobEvent {
-    private _type: string;
-    private _target: any;
-    private _data: Blob;
-    
-    constructor(type: string, target: any, data: Blob) {
-        this._type = type;
-        this._target = target;
-        this._data = data;
-    }
-    
-    get type(): string {
-        return this._type;
-    }
-    
-    get target(): any {
-        return this._target;
-    }
-    
-    get data(): Blob {
-        return this._data;
-    }
-}
-
-interface BlobEventListener {
-    (ev: BlobEvent): void;
-}
 
 class VorbisWorkerScript {
     private static _url: string;
@@ -135,28 +102,11 @@ class VorbisWorkerScript {
     }
 }
 
-interface Deferred {
-    promise: Promise<{}>;
-    resolve: any;
-    reject:  any;
-}
-
-function defer(): Deferred {
-    var result: Deferred = {
-        promise: null,
-        resolve: null,
-        reject:  null
-    };
-    
-    result.promise = new Promise((resolve, reject) => {
-        result.resolve = resolve;
-        result.reject = reject;
-    });
-    
-    return result;
-}
-
 function noop() { }
+
+interface DataCallback {
+    (data: ArrayBuffer): void;
+}
 
 class VorbisEncoder {
     // ---
@@ -165,7 +115,7 @@ class VorbisEncoder {
     
     // ---
     
-    private _ondata: BlobEventListener;
+    private _ondata: DataCallback;
     
     private _onfinish: EventListener;
     
@@ -196,11 +146,11 @@ class VorbisEncoder {
         });
     }
     
-    get ondata(): BlobEventListener {
+    get ondata(): DataCallback {
         return this._ondata;
     }
     
-    set ondata(value: BlobEventListener) {
+    set ondata(value: DataCallback) {
         this._ondata = value || noop;
     }
     
@@ -243,7 +193,7 @@ class VorbisEncoder {
             break;
             
         case 'data':
-            this._ondata(new BlobEvent('data', this, new Blob([data.buffer])))
+            this._ondata(data.buffer);
             break;
             
         case 'finish':
@@ -253,8 +203,18 @@ class VorbisEncoder {
     }
 }
 
+enum RecordingState {
+    "inactive",
+    "recording",
+    "paused"
+}
+
 interface VorbisMediaRecorderOptions {
     // TODO
+}
+
+function makeBlobEvent(type: string, blob: Blob): BlobEvent {
+    return new BlobEvent(type, { data: blob, blob: blob });
 }
 
 class VorbisMediaRecorder {
@@ -395,7 +355,7 @@ class VorbisMediaRecorder {
     }
     
     private onDataAvailable(data: Blob) {
-        this._ondataavailable(new BlobEvent('dataavailable', this, data));
+        this._ondataavailable(makeBlobEvent('dataavailable', data));
     }
     
     private onStop() {
@@ -403,6 +363,7 @@ class VorbisMediaRecorder {
     }
     
     private handleEncoderData(ev: BlobEvent) {
+        console.log(ev);
         this._chunks.push(ev.data);
     }
     
