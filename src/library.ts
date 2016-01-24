@@ -95,7 +95,9 @@ class VorbisWorkerScript {
             switch (data.type) {
             case 'init':
                 importScripts(data.encoderURL);
+                break;
                 
+            case 'start':
                 handle = _encoder_create_vbr(data.channels, data.sampleRate, data.quality);
                 
                 _encoder_write_headers(handle);
@@ -220,10 +222,7 @@ class VorbisMediaRecorder {
         
         this._encoder.postMessage({
             type: 'init',
-            encoderURL: encoderURL,
-            sampleRate: this._ctx.sampleRate,
-            channels: this._sourceNode.channelCount,
-            quality: 1.0
+            encoderURL: encoderURL
         });
     }
     
@@ -275,9 +274,17 @@ class VorbisMediaRecorder {
         setTimeout(() => {
             
             this._state = RecordingState.recording;
+            this._chunks = [];
             
             this._sourceNode.connect(this._procNode);
             this._procNode.connect(this._ctx.destination);
+            
+            this._encoder.postMessage({
+                type: 'start',
+                sampleRate: this._ctx.sampleRate,
+                channels: this._sourceNode.channelCount,
+                quality: 1.0
+            });
             
             this.onStart();
             
@@ -316,7 +323,7 @@ class VorbisMediaRecorder {
         
         switch (data.type) {
         case 'load':
-            
+            // TODO
             break;
             
         case 'data':
