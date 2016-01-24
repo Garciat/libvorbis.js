@@ -161,7 +161,7 @@ function noop() { }
 class VorbisEncoder {
     // ---
     
-    private _encoder: Worker;
+    private _worker: Worker;
     
     // ---
     
@@ -172,7 +172,7 @@ class VorbisEncoder {
     // ---
     
     constructor() {
-        this._encoder = new Worker(VorbisWorkerScript.getScriptURL());
+        this._worker = new Worker(VorbisWorkerScript.getScriptURL());
         
         // ---
         
@@ -182,7 +182,7 @@ class VorbisEncoder {
         
         // ---
         
-        this._encoder.onmessage = this.handleEncoderMessage.bind(this);
+        this._worker.onmessage = this.handleEncoderMessage.bind(this);
         
         // ---
         
@@ -190,7 +190,7 @@ class VorbisEncoder {
         
         const encoderURL = location.protocol + "//" + location.host + dirname + "/vorbis_encoder.js";
         
-        this._encoder.postMessage({
+        this._worker.postMessage({
             type: 'init',
             encoderURL: encoderURL
         });
@@ -213,7 +213,7 @@ class VorbisEncoder {
     }
     
     init(channels: number, sampleRate: number, quality: number) {
-        this._encoder.postMessage({
+        this._worker.postMessage({
             type: 'start',
             sampleRate: sampleRate,
             channels: channels,
@@ -222,7 +222,7 @@ class VorbisEncoder {
     }
     
     encode(buffers: ArrayBuffer[], samples: number, channels: number) {
-        this._encoder.postMessage({
+        this._worker.postMessage({
             type: 'data',
             samples: samples,
             channels: channels,
@@ -231,7 +231,7 @@ class VorbisEncoder {
     }
     
     finish() {
-        this._encoder.postMessage({ type: 'finish' });
+        this._worker.postMessage({ type: 'finish' });
     }
     
     private handleEncoderMessage(ev: MessageEvent) {
