@@ -417,13 +417,15 @@ class VorbisMediaRecorder {
     private handleAudioProcess(ev: AudioProcessingEvent) {
         const buffers: ArrayBuffer[] = [];
         
-        const samples = ev.inputBuffer.length;
+        const audioBuffer = ev.inputBuffer;
         
-        const channels = ev.inputBuffer.numberOfChannels;
+        const samples = audioBuffer.length;
+        
+        const channels = audioBuffer.numberOfChannels;
         
         for (let ch = 0; ch < channels; ++ch) {
             // make a copy
-            const array = ev.inputBuffer.getChannelData(ch).slice();
+            const array = audioBuffer.getChannelData(ch).slice();
             
             buffers.push(array.buffer);
         }
