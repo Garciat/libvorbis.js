@@ -1,7 +1,7 @@
 NATIVE_DIR=$(PWD)/native
 OUTPUT_DIR=$(PWD)/build
 
-EMCC_OPTS=--llvm-lto 1 --memory-init-file 0 -s BUILD_AS_WORKER=0 \
+EMCC_OPTS=-O3 --llvm-lto 1 --memory-init-file 0 -s BUILD_AS_WORKER=0 \
 		-s NO_FILESYSTEM=1 -s NO_BROWSER=1 -s EXPORTED_FUNCTIONS="['_malloc']" -s EXPORTED_RUNTIME_METHODS="['setValue', 'getValue']"
 
 OGG_DIR=$(NATIVE_DIR)/ogg
