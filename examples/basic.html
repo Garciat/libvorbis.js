@@ -1,0 +1,68 @@
+<script src="library.js"></script>
+<script>
+    'use strict';
+
+    function main() {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then((mediaStream) => {
+            stuff(mediaStream);
+        });
+    }
+    
+    window.addEventListener('load', main);
+
+    function stuff(mediaStream) {
+        console.log(mediaStream);
+        
+        var recorder = new VorbisMediaRecorder(mediaStream, { audioBitsPerSecond: 32000 });
+        
+        console.log(recorder);
+        
+        var chunks = [];
+        
+        recorder.ondataavailable = (ev) => {
+            console.log(ev);
+            console.log(ev.data);
+            chunks.push(ev.data);
+        };
+        
+        recorder.onstart = () => {
+            console.log('start');
+        };
+        
+        recorder.onstop = () => {
+            console.log('stop');
+            var blob = new Blob(chunks, { type: chunks[0].type });
+            chunks = [];
+            var url = URL.createObjectURL(blob);
+            
+            var div = document.createElement('div');
+            div.style.border = '1px solid';
+            
+            var audio = document.createElement('video');
+            audio.controls = true;
+            audio.src = url;
+            div.appendChild(audio);
+            
+            var link = document.createElement('a');
+            link.download = 'recording.ogg';
+            link.href = url;
+            link.innerHTML = 'download';
+            div.appendChild(link);
+            
+            document.body.appendChild(div);
+        };
+        
+        var button = document.createElement('button');
+        button.innerHTML = 'start';
+        button.onclick = () => {
+            if (recorder.state === 'recording') {
+                recorder.stop();
+                button.innerHTML = 'start';
+            } else {
+                recorder.start();
+                button.innerHTML = 'stop';
+            }
+        };
+        document.body.appendChild(button);
+    }
+</script>

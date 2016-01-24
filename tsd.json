@@ -6,7 +6,13 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "es6-promise/es6-promise.d.ts": {
-      "commit": "f6c8ca47193fb67947944a3170912672ac3e908e"
+      "commit": "7fffbd3e040a93c244777e3be04cd6223ac69301"
+    },
+    "webrtc/MediaStream.d.ts": {
+      "commit": "7fffbd3e040a93c244777e3be04cd6223ac69301"
+    },
+    "webaudioapi/waa.d.ts": {
+      "commit": "7fffbd3e040a93c244777e3be04cd6223ac69301"
     }
   }
 }
