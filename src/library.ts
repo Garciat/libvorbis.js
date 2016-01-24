@@ -407,7 +407,9 @@ class VorbisMediaRecorder {
     }
     
     private handleEncoderFinish() {
-        this.onDataAvailable(new Blob(this._chunks, { type: this.mimeType }));
+        const blob = new Blob(this._chunks, { type: this.mimeType });
+        
+        this.onDataAvailable(blob);
         
         this.onStop();
     }
