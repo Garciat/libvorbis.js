@@ -158,6 +158,101 @@ function defer(): Deferred {
 
 function noop() { }
 
+class VorbisEncoder {
+    // ---
+    
+    private _encoder: Worker;
+    
+    // ---
+    
+    private _ondata: BlobEventListener;
+    
+    private _onfinish: EventListener;
+    
+    // ---
+    
+    constructor() {
+        this._encoder = new Worker(VorbisWorkerScript.getScriptURL());
+        
+        // ---
+        
+        this._ondata = noop;
+        
+        this._onfinish = noop;
+        
+        // ---
+        
+        this._encoder.onmessage = this.handleEncoderMessage.bind(this);
+        
+        // ---
+        
+        const dirname = location.pathname.split('/').slice(0, -1).join('/');
+        
+        const encoderURL = location.protocol + "//" + location.host + dirname + "/vorbis_encoder.js";
+        
+        this._encoder.postMessage({
+            type: 'init',
+            encoderURL: encoderURL
+        });
+    }
+    
+    get ondata(): BlobEventListener {
+        return this._ondata;
+    }
+    
+    set ondata(value: BlobEventListener) {
+        this._ondata = value || noop;
+    }
+    
+    get onfinish(): EventListener {
+        return this._onfinish;
+    }
+    
+    set onfinish(value: EventListener) {
+        this._onfinish = value || noop;
+    }
+    
+    init(channels: number, sampleRate: number, quality: number) {
+        this._encoder.postMessage({
+            type: 'start',
+            sampleRate: sampleRate,
+            channels: channels,
+            quality: quality
+        });
+    }
+    
+    encode(buffers: ArrayBuffer[], samples: number, channels: number) {
+        this._encoder.postMessage({
+            type: 'data',
+            samples: samples,
+            channels: channels,
+            buffers: buffers
+        }, buffers);
+    }
+    
+    finish() {
+        this._encoder.postMessage({ type: 'finish' });
+    }
+    
+    private handleEncoderMessage(ev: MessageEvent) {
+        const data = ev.data;
+        
+        switch (data.type) {
+        case 'load':
+            // TODO
+            break;
+            
+        case 'data':
+            this._ondata(new BlobEvent('data', this, new Blob([data.buffer])))
+            break;
+            
+        case 'finish':
+            this._onfinish(new Event('finish'));
+            break;
+        }
+    }
+}
+
 interface VorbisMediaRecorderOptions {
     // TODO
 }
@@ -171,9 +266,9 @@ class VorbisMediaRecorder {
     
     // ---
     
-    private _encoder: Worker;
+    private _encoder: VorbisEncoder;
     
-    private _chunks: ArrayBuffer[];
+    private _chunks: Blob[];
     
     // ---
     
@@ -197,7 +292,7 @@ class VorbisMediaRecorder {
         this._state = RecordingState.inactive;
         this._stream = stream;
         
-        this._encoder = new Worker(VorbisWorkerScript.getScriptURL());
+        this._encoder = new VorbisEncoder();
         this._chunks = [];
         
         this._ctx = new AudioContext();
@@ -210,20 +305,11 @@ class VorbisMediaRecorder {
         
         // ---
         
-        this._encoder.onmessage = this.handleEncoderMessage.bind(this);
+        this._encoder.ondata = this.handleEncoderData.bind(this);
+        
+        this._encoder.onfinish = this.handleEncoderFinish.bind(this);
         
         this._procNode.onaudioprocess = this.handleAudioProcess.bind(this);
-        
-        // ---
-        
-        const dirname = location.pathname.split('/').slice(0, -1).join('/');
-        
-        const encoderURL = location.protocol + "//" + location.host + dirname + "/vorbis_encoder.js";
-        
-        this._encoder.postMessage({
-            type: 'init',
-            encoderURL: encoderURL
-        });
     }
     
     get stream(): MediaStream {
@@ -279,12 +365,10 @@ class VorbisMediaRecorder {
             this._sourceNode.connect(this._procNode);
             this._procNode.connect(this._ctx.destination);
             
-            this._encoder.postMessage({
-                type: 'start',
-                sampleRate: this._ctx.sampleRate,
-                channels: this._sourceNode.channelCount,
-                quality: 1.0
-            });
+            const channels = this._sourceNode.channelCount;
+            const sampleRate = this._ctx.sampleRate;
+            
+            this._encoder.init(channels, sampleRate, 0.4);
             
             this.onStart();
             
@@ -302,7 +386,7 @@ class VorbisMediaRecorder {
             this._sourceNode.disconnect(this._procNode);
             this._procNode.disconnect(this._ctx.destination);
             
-            this._encoder.postMessage({ type: 'finish' });
+            this._encoder.finish();
         });
     }
     
@@ -318,24 +402,14 @@ class VorbisMediaRecorder {
         this._onstop(new Event('stop'));
     }
     
-    private handleEncoderMessage(ev: MessageEvent) {
-        const data = ev.data;
+    private handleEncoderData(ev: BlobEvent) {
+        this._chunks.push(ev.data);
+    }
+    
+    private handleEncoderFinish() {
+        this.onDataAvailable(new Blob(this._chunks, { type: this.mimeType }));
         
-        switch (data.type) {
-        case 'load':
-            // TODO
-            break;
-            
-        case 'data':
-            this._chunks.push(data.buffer);
-            break;
-            
-        case 'finish':
-            this.onDataAvailable(new Blob(this._chunks, { type: this.mimeType }));
-            
-            this.onStop();
-            break;
-        }
+        this.onStop();
     }
     
     private handleAudioProcess(ev: AudioProcessingEvent) {
@@ -352,11 +426,6 @@ class VorbisMediaRecorder {
             buffers.push(array.buffer);
         }
         
-        this._encoder.postMessage({
-            type: 'data',
-            samples: samples,
-            channels: channels,
-            buffers: buffers
-        }, buffers);
-    };
+        this._encoder.encode(buffers, samples, channels);
+    }
 }
