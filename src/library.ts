@@ -228,7 +228,7 @@ class VorbisMediaRecorder {
     
     private _encoder: VorbisEncoder;
     
-    private _chunks: Blob[];
+    private _chunks: ArrayBuffer[];
     
     // ---
     
@@ -362,9 +362,8 @@ class VorbisMediaRecorder {
         this._onstop(new Event('stop'));
     }
     
-    private handleEncoderData(ev: BlobEvent) {
-        console.log(ev);
-        this._chunks.push(ev.data);
+    private handleEncoderData(data: ArrayBuffer) {
+        this._chunks.push(data);
     }
     
     private handleEncoderFinish() {

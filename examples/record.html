@@ -20,7 +20,6 @@
         var chunks = [];
         
         recorder.ondataavailable = (ev) => {
-            console.log(ev);
             console.log(ev.data);
             chunks.push(ev.data);
         };
