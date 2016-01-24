@@ -1,0 +1,130 @@
+<script src="library.js"></script>
+<script>
+    'use strict';
+    
+    function downloadArrayBuffer(url) {
+        return new Promise(function (resolve, reject) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.responseType = 'arraybuffer';
+            
+            xhr.onload = function () {
+                resolve(xhr.response);
+            };
+            
+            xhr.onerror = function () {
+                reject();
+            };
+            
+            xhr.send();
+        });
+    }
+    
+    function decodeAudioData(audioData) {
+        var ctx = new AudioContext();
+        return new Promise(function (resolve, reject) {
+            ctx.decodeAudioData(audioData, resolve, reject);
+        })
+    }
+    
+    function encodeAudioBuffer(audioBuffer) {
+        
+        var encoder = new VorbisEncoder();
+        
+        console.log(encoder);
+        
+        var chunks = [];
+        
+        encoder.ondata = (ev) => {
+            chunks.push(ev.data);
+        };
+        
+        encoder.onfinish = () => {
+            console.timeEnd('encode');
+            
+            var blob = new Blob(chunks, { type: 'audio/ogg' });
+            chunks = [];
+            var url = URL.createObjectURL(blob);
+            
+            var div = document.createElement('div');
+            div.style.border = '1px solid';
+            
+            var audio = document.createElement('video');
+            audio.controls = true;
+            audio.src = url;
+            div.appendChild(audio);
+            
+            var link = document.createElement('a');
+            link.download = 'recording.ogg';
+            link.href = url;
+            link.innerHTML = 'download';
+            div.appendChild(link);
+            
+            document.body.appendChild(div);
+        };
+        
+        function encode(audioBuffer) {
+            var buffers = [];
+            
+            var samples = audioBuffer.length;
+            
+            var channels = audioBuffer.numberOfChannels;
+            
+            for (var ch = 0; ch < channels; ++ch) {
+                // make a copy
+                const array = audioBuffer.getChannelData(ch).slice();
+                
+                buffers.push(array.buffer);
+            }
+            
+            encoder.encode(buffers, samples, channels);
+        }
+        
+        var samples = audioBuffer.length;
+        
+        var channels = audioBuffer.numberOfChannels;
+        
+        var sampleRate = audioBuffer.sampleRate;
+        
+        var chunkSize = sampleRate * 1;
+        
+        console.time('encode');
+        
+        encoder.init(channels, sampleRate, 1.0);
+        
+        var ctx = new AudioContext();
+        
+        for (var n = 0; n < samples; n += chunkSize) {
+            var actualSize = Math.min(chunkSize, samples - n);
+            
+            var chunkBuffer = ctx.createBuffer(channels, chunkSize, ctx.sampleRate);
+            
+            for (var ch = 0; ch < channels; ch += 1) {
+                var src  = audioBuffer.getChannelData(ch).subarray(n, n + actualSize);
+                var dest = chunkBuffer.getChannelData(ch);
+                dest.set(src);
+            }
+            
+            encode(chunkBuffer);
+        }
+        
+        encoder.finish();
+    }
+    
+    function playAudioBuffer(audioBuffer) {
+        var ctx = new AudioContext();
+        var source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(ctx.destination);
+        source.start();
+    }
+    
+    function main() {
+        downloadArrayBuffer('test300.wav')
+            .then(decodeAudioData)
+            .then(encodeAudioBuffer);
+    }
+    
+    window.addEventListener('load', main);
+    
+</script>
