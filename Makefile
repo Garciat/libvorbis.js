@@ -1,8 +1,9 @@
 NATIVE_DIR=$(PWD)/native
 OUTPUT_DIR=$(PWD)/build
 
-EMCC_OPTS=-O3 --llvm-lto 1 --memory-init-file 0 -s NO_EXIT_RUNTIME=1 -s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
-		-s NO_FILESYSTEM=1 -s NO_BROWSER=1 -s EXPORTED_FUNCTIONS="['_malloc']" -s EXPORTED_RUNTIME_METHODS="['setValue', 'getValue']"
+EMCC_OPTS=-O3 --llvm-lto 1 --memory-init-file 0 \
+		-s NO_EXIT_RUNTIME=1 -s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
+		-s NO_FILESYSTEM=1 -s NO_BROWSER=1
 
 OGG_DIR=$(NATIVE_DIR)/ogg
 OGG_PRE=$(OUTPUT_DIR)/ogg
@@ -27,7 +28,7 @@ TARGETS=$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ) $(VORBIS_ENCODE
 
 all: $(TARGETS)
 clean: clean-artifacts
-	rm -r $(OUTPUT_DIR)
+	rm -r $(OGG_PRE) $(VORBIS_PRE) $(WRAPPER_OBJ) $(VORBIS_ENCODER) $(VORBIS_LIB)
 
 clean-artifacts:
 	rm $(OGG_DIR)/a.out* $(VORBIS_DIR)/a.out*; \
