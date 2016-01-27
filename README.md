@@ -5,9 +5,9 @@
 **libvorbis.js** is an ASM.JS distribution of C libraries `libogg`,
 `libvorbis`, and `libvorbisenc`. It also includes a library wrapper
 that implements the W3C [`MediaRecorder`](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder)
-interface*.
+interface**.
 
-* Full compliance under development.
+** Full compliance under development.
 
 ## Why?
 
