@@ -28,13 +28,12 @@ TARGETS=$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ) $(VORBIS_ENCODE
 
 all: $(TARGETS)
 
-clean: clean-artifacts clean-bench
+clean: reset-submodules clean-bench
 	rm -rf typings $(OGG_PRE) $(VORBIS_PRE) $(WRAPPER_OBJ) $(VORBIS_ENCODER) $(VORBIS_LIB)
 
-clean-artifacts:
-	rm -f $(OGG_DIR)/a.out* $(VORBIS_DIR)/a.out*; \
-	(cd $(OGG_DIR); git reset --hard); \
-	(cd $(VORBIS_DIR); git reset --hard)
+reset-submodules:
+	(cd $(OGG_DIR); rm -rf *; git reset --hard); \
+	(cd $(VORBIS_DIR); rm -rf *; git reset --hard)
 
 $(OUTPUT_DIR):
 	mkdir $@
@@ -53,9 +52,13 @@ $(OGG_OBJ): $(OGG_DIR)/Makefile
 	cd $(OGG_DIR); emmake make; emmake make install
 $(OGG_DIR)/Makefile: $(OGG_DIR)/configure
 	cd $(OGG_DIR); emconfigure ./configure --prefix=$(OGG_PRE)
-$(OGG_DIR)/configure:
+$(OGG_DIR)/configure: $(OGG_DIR)/configure.ac.bak
+	cd $(OGG_DIR); ./autogen.sh
+# emscripten bug (https://github.com/kripken/emscripten/pull/3711)
+$(OGG_DIR)/configure.ac.bak:
 	cd $(OGG_DIR); \
-	./autogen.sh
+	cp configure.ac configure.ac.bak; \
+	sed -i -e "s/O20/O2/g" configure.ac
 
 $(VORBIS_INC): $(VORBIS_OBJ)
 $(VORBIS_OBJ): $(VORBIS_DIR)/Makefile
