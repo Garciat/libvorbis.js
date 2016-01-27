@@ -33,7 +33,8 @@ clean: clean-artifacts clean-bench
 
 clean-artifacts:
 	rm -f $(OGG_DIR)/a.out* $(VORBIS_DIR)/a.out*; \
-	(cd $(OGG_DIR); if [ -a configure.ac.bak ]; then mv configure.ac.bak configure.ac; fi)
+	(cd $(OGG_DIR); git reset --hard); \
+	(cd $(VORBIS_DIR); git reset --hard)
 
 $(OUTPUT_DIR):
 	mkdir $@
@@ -49,11 +50,9 @@ $(OGG_OBJ): $(OGG_DIR)/Makefile
 	cd $(OGG_DIR); emmake make; emmake make install
 $(OGG_DIR)/Makefile: $(OGG_DIR)/configure
 	cd $(OGG_DIR); emconfigure ./configure --prefix=$(OGG_PRE)
-$(OGG_DIR)/configure: $(OGG_DIR)/configure.ac.bak
-	cd $(OGG_DIR); ./autogen.sh
-# emscripten bug (https://github.com/kripken/emscripten/pull/3711)
-$(OGG_DIR)/configure.ac.bak:
-	cd $(OGG_DIR); cp configure.ac configure.ac.bak; sed -i -e "s/O20/O2/g" configure.ac
+$(OGG_DIR)/configure:
+	cd $(OGG_DIR); \
+	./autogen.sh
 
 $(VORBIS_INC): $(VORBIS_OBJ)
 $(VORBIS_OBJ): $(VORBIS_DIR)/Makefile
@@ -81,7 +80,7 @@ bench-node: bench/test300.raw bench/program.js $(VORBIS_ENCODER)
 	cd bench; time node ./program.js test300.raw /dev/null
 
 clean-bench:
-	cd bench; rm test300.raw program-cpp
+	cd bench; rm -f test300.raw program-cpp
 
 bench/test300.raw:
 	curl https://gist.githubusercontent.com/Garciat/c01d75e88891f66c8565/raw/4f247e6affba184142d87dee7f8c39f153254149/test300.raw.xz.b64 | base64 -d | unxz > $@
