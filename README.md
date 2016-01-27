@@ -1,106 +1,51 @@
 # libvorbis.js
 
-## What it is
+## What?
 
-This spits out a javascript file that can be used in the browser to convert PCM audio data to compressed ogg vorbis audio.
+**libvorbis.js** is an ASM.JS distribution of C libraries `libogg`,
+`libvorbis`, and `libvorbisenc`. It also includes a library wrapper
+that implements the W3C [`MediaRecorder`](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder)
+interface*.
 
-## Install
+* Full compliance under development.
 
-```
-bower install libvorbis.js
-```
+## Why?
 
-## Download
+Unfortunately, Chromium (Chrome) does not yet ship a public, audio-capable
+implementation of `MediaRecorder`. (It should arrive with Chromium 49.)
 
-See [releases](https://github.com/Garciat/libvorbis.js/releases).
+**libvorbis.js** aims to fill this void for the time being.
 
-## Build
+## OK, cool. What now?
+
+## Demo it.
+
+(Soon)
+
+## Install it.
+
+(Soon)
+
+## Download it.
+
+(Soon)
+
+## Build it.
 
 **Requirements**
+
 - emscripten compiler
 - TypeScript 1.5+ compiler (`npm install -g typescript`)
-- uglifyjs (`npm install -g uglifyjs`)
 
 **Instructions**
+
 ```bash
 git submodule init
 git submodule update
-./build.sh
+make -j
 ```
 
-## Demos
-
-[Microphone recorder](http://garciat.com/libvorbis.js/demos/microphone-recorder.html).
-
-## API
-
-```typescript
-declare module libvorbis {
-    interface OggVbrEncoderOptions {
-        channels: number;
-        sampleRate: number;
-        quality: number;
-    }
-    
-    class OggVbrEncoder {
-        constructor(module: OggVbrModule, options: OggVbrEncoderOptions);
-        
-        static create(options: OggVbrEncoderOptions): Promise<OggVbrEncoder>;
-        
-        /**
-         * Performs a encoding step on the provided PCM channel data.
-         * It may or may not produce an output ArrayBuffer.
-         *
-         * @param channelData An array of PCM data buffers (one for each channel).
-         */
-        encode(channelData: Float32Array[]): ArrayBuffer;
-        
-        /**
-         * Finalizes the OGG Vorbis stream.
-         * It may or may not produce an output ArrayBuffer.
-         */
-        finish(): ArrayBuffer;
-    }
-    
-    interface OggVbrAsyncEncoderOptions {
-        workerURL: string;
-        moduleURL: string;
-        encoderOptions: OggVbrEncoderOptions;
-    }
-    
-    class OggVbrAsyncEncoder {
-        /**
-         * Call static method create() to instantiate this class!
-         */
-        constructor(worker: Worker, onData: (data: ArrayBuffer) => void, onFinished: () => void);
-        
-        static create(options: OggVbrAsyncEncoderOptions,
-                      onData: (data: ArrayBuffer) => void,
-                      onFinished: () => void): Promise<OggVbrAsyncEncoder>;
-        
-        /**
-         * Performs a encoding step on the provided PCM channel data.
-         *
-         * @param channelData An array of PCM data buffers (one for each channel).
-         */
-        encode(channelData: Float32Array[]): void;
-        
-        /**
-         * Performs a encoding step on the provided PCM channel data.
-         * Warning: passed buffers will be transferred to the Worker, rendering
-         * them unusable from this thread.
-         *
-         * @param channelData An array of PCM data buffers (one for each channel).
-         */
-        encodeTransfer(channelData: Float32Array[]): void;
-        
-        /**
-         * Finalizes the OGG Vorbis stream.
-         */
-        finish(): void;
-    }
-}
-```
+Then, look for `build/vorbis_encoder.js` and `build/library.js`.
 
 ## Credits
 
