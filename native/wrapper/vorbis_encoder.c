@@ -11,7 +11,7 @@ static void encoder_write_page(encoder_instance state, ogg_page *og);
 static void encoder_encode_work(encoder_instance state);
 
 encoder_instance encoder_create_vbr(int ch, int bitrate, float quality) {
-  encoder_instance state = malloc(sizeof(struct encoder_state));
+  encoder_instance state = (encoder_instance)malloc(sizeof(struct encoder_state));
   state->data = NULL;
   state->data_len = 0;
   
@@ -120,7 +120,7 @@ void encoder_write_page(encoder_instance state, ogg_page *og) {
     return;
   }
   
-  state->data = realloc(state->data, size);
+  state->data = (unsigned char *)realloc(state->data, size);
   
   memcpy(state->data + state->data_len, og->header, og->header_len);
   state->data_len += og->header_len;
