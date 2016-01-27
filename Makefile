@@ -27,12 +27,13 @@ VORBIS_LIB=$(OUTPUT_DIR)/library.js
 TARGETS=$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ) $(VORBIS_ENCODER) $(VORBIS_LIB)
 
 all: $(TARGETS)
-clean: clean-artifacts
-	rm -r $(OGG_PRE) $(VORBIS_PRE) $(WRAPPER_OBJ) $(VORBIS_ENCODER) $(VORBIS_LIB)
+
+clean: clean-artifacts clean-bench
+	rm -rf $(OGG_PRE) $(VORBIS_PRE) $(WRAPPER_OBJ) $(VORBIS_ENCODER) $(VORBIS_LIB)
 
 clean-artifacts:
-	rm $(OGG_DIR)/a.out* $(VORBIS_DIR)/a.out*; \
-	(cd $(OGG_DIR); mv configure.ac.bak configure.ac)
+	rm -f $(OGG_DIR)/a.out* $(VORBIS_DIR)/a.out*; \
+	(cd $(OGG_DIR); if [ -a configure.ac.bak ]; then mv configure.ac.bak configure.ac; fi)
 
 $(OUTPUT_DIR):
 	mkdir $@
@@ -66,3 +67,24 @@ $(VORBISENC_OBJ): $(VORBIS_OBJ)
 
 $(WRAPPER_OBJ): $(OGG_INC) $(VORBIS_INC) $(WRAPPER_DIR)/vorbis_encoder.c
 	emcc -c -o $@ -Wall -O3 -I$(OGG_INC) -I$(VORBIS_INC) $(WRAPPER_DIR)/vorbis_encoder.c
+
+# ========================================
+#   Benchmark
+# ========================================
+
+bench: bench-cpp bench-node
+
+bench-cpp: bench/test300.raw bench/program-cpp
+	cd bench; time ./program-cpp test300.raw /dev/null
+
+bench-node: bench/test300.raw bench/program.js $(VORBIS_ENCODER)
+	cd bench; time node ./program.js test300.raw /dev/null
+
+clean-bench:
+	cd bench; rm test300.raw program-cpp
+
+bench/test300.raw:
+	curl https://gist.githubusercontent.com/Garciat/c01d75e88891f66c8565/raw/4f247e6affba184142d87dee7f8c39f153254149/test300.raw.xz.b64 | base64 -d | unxz > $@
+
+bench/program-cpp: bench/program.cpp
+	g++ -std=c++14 -o $@ -logg -lvorbis -lvorbisenc bench/program.cpp
