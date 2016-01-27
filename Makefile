@@ -29,7 +29,7 @@ TARGETS=$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ) $(VORBIS_ENCODE
 all: $(TARGETS)
 
 clean: clean-artifacts clean-bench
-	rm -rf $(OGG_PRE) $(VORBIS_PRE) $(WRAPPER_OBJ) $(VORBIS_ENCODER) $(VORBIS_LIB)
+	rm -rf typings $(OGG_PRE) $(VORBIS_PRE) $(WRAPPER_OBJ) $(VORBIS_ENCODER) $(VORBIS_LIB)
 
 clean-artifacts:
 	rm -f $(OGG_DIR)/a.out* $(VORBIS_DIR)/a.out*; \
@@ -39,8 +39,11 @@ clean-artifacts:
 $(OUTPUT_DIR):
 	mkdir $@
 
-$(VORBIS_LIB): src/library.ts
+$(VORBIS_LIB): typings src/library.ts
 	tsc --outDir $(OUTPUT_DIR) -p src
+
+typings:
+	tsd install
 
 $(VORBIS_ENCODER): $(OUTPUT_DIR) $(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ)
 	emcc -o $@ $(EMCC_OPTS) -s EXPORTED_FUNCTIONS="@exported_functions.json" $(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ)

@@ -36,6 +36,7 @@ implementation of `MediaRecorder`. (It should arrive with Chromium 49.)
 
 - emscripten compiler
 - TypeScript 1.5+ compiler (`npm install -g typescript`)
+- TypeScript Definition Manager (`npm install -g tsd`)
 
 **Instructions**
 
