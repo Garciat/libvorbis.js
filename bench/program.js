@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-const encoder = require('../build/vorbis_encoder');
+const encoder = require('vorbis_encoder');
 
 if (process.argv.length !== 4) {
     process.exit();

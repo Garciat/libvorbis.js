@@ -44,7 +44,7 @@ $(VORBIS_LIB): typings src/library.ts
 typings:
 	tsd install
 
-$(VORBIS_ENCODER): $(OUTPUT_DIR) $(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ)
+$(VORBIS_ENCODER): $(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ) | $(OUTPUT_DIR)
 	emcc -o $@ $(EMCC_OPTS) -s EXPORTED_FUNCTIONS="@exported_functions.json" $(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ)
 
 $(OGG_INC): $(OGG_OBJ)
@@ -77,19 +77,29 @@ $(WRAPPER_OBJ): $(OGG_INC) $(VORBIS_INC) $(WRAPPER_DIR)/vorbis_encoder.c
 #   Benchmark
 # ========================================
 
+BENCH_WD=build/bench
+
 bench: bench-cpp bench-node
 
-bench-cpp: bench/test300.raw bench/program-cpp
-	cd bench; time ./program-cpp test300.raw /dev/null
-
-bench-node: bench/test300.raw bench/program.js $(VORBIS_ENCODER)
-	cd bench; time node ./program.js test300.raw /dev/null
-
 clean-bench:
-	cd bench; rm -f test300.raw program-cpp
+	cd build; rm -f test300.raw program-cpp
 
-bench/test300.raw:
+$(BENCH_WD): | $(OUTPUT_DIR)
+	mkdir $@
+
+bench-cpp: $(BENCH_WD)/test300.raw $(BENCH_WD)/program-cpp
+	cd $(BENCH_WD); time ./program-cpp test300.raw /dev/null
+
+bench-node: $(BENCH_WD)/test300.raw $(BENCH_WD)/program.js $(VORBIS_ENCODER)
+	cd $(BENCH_WD); \
+	export NODE_PATH=$(OUTPUT_DIR); \
+	time node ./program.js test300.raw /dev/null
+
+$(BENCH_WD)/test300.raw: | $(BENCH_WD)
 	curl https://gist.githubusercontent.com/Garciat/c01d75e88891f66c8565/raw/4f247e6affba184142d87dee7f8c39f153254149/test300.raw.xz.b64 | base64 -d | unxz > $@
 
-bench/program-cpp: bench/program.cpp
+$(BENCH_WD)/program.js: bench/program.js | $(BENCH_WD)
+	cp bench/program.js $@
+
+$(BENCH_WD)/program-cpp: bench/program.cpp | $(BENCH_WD)
 	g++ -std=c++14 -o $@ -logg -lvorbis -lvorbisenc bench/program.cpp
