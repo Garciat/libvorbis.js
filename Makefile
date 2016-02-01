@@ -47,7 +47,7 @@ typings:
 
 OBJS=$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ)
 
-$(VORBIS_ENCODER): $(OBJECTS) src/vorbis_encoder.pre.js src/vorbis_encoder.post.js | $(OUTPUT_DIR)
+$(VORBIS_ENCODER): $(OBJS) src/vorbis_encoder.pre.js src/vorbis_encoder.post.js | $(OUTPUT_DIR)
 	emcc -o $@ $(EMCC_OPTS) -s EXPORTED_FUNCTIONS="@exported_functions.json" \
 		$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ) \
 		--pre-js src/vorbis_encoder.pre.js --post-js src/vorbis_encoder.post.js
