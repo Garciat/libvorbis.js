@@ -5,59 +5,44 @@
 /// <reference path="MediaRecorder.d.ts" />
 /// <reference path="vorbis_encoder.d.ts" />
 
-// TODO optimize double JS parsing (via Blob URL)
-class VorbisEncoderScript {
-    private static _url: string;
-    
-    static getScriptURL(): string {
-        if (!VorbisEncoderScript._url) {
-            VorbisEncoderScript._url = VorbisEncoderScript.makeScriptURL();
-        }
-        return VorbisEncoderScript._url;
+const getScriptAbsoluteURL = (function () {
+    if (!self.document) {
+        return null;
     }
     
-    private static makeScriptURL(): string {
-        const func = makeVorbisEncoderModule.toString();
+    const script = <HTMLScriptElement>(<any> document).currentScript;
+    const scriptSrc = script.getAttribute('src');
+    
+    const absoluteRegex = /^(blob\:|http\:|https\:)/;
+    
+    let url: string;
+    
+    if (absoluteRegex.test(scriptSrc)) {
+        url = scriptSrc;
+    } else {
+        const dirname = location.pathname.split('/').slice(0, -1).join('/');
         
-        const source = `var Module; (${func})(Module || (Module = {}));`;
+        url = `${location.protocol}//${location.host}`;
         
-        const blob = new Blob([source], { type: 'application/javascript' });
-        
-        const url = URL.createObjectURL(blob);
-        
-        return url;
+        if (scriptSrc[0] === '/') {
+            url += scriptSrc;
+        } else {
+            url += dirname + '/' + scriptSrc;
+        }	
     }
-}
+    
+    return () => url;
+})();
 
 class VorbisWorkerScript {
-    private static _url: string;
-    
-    static getScriptURL(): string {
-        if (!VorbisWorkerScript._url) {
-            VorbisWorkerScript._url = VorbisWorkerScript.makeScriptURL();
-        }
-        return VorbisWorkerScript._url;
-    }
-    
-    private static makeScriptURL(): string {
-        const func = VorbisWorkerScript.script.toString();
-        
-        const source = `var Module; (${func})(self, Module || (Module = {}));`;
-        
-        const blob = new Blob([source], { type: 'application/javascript' });
-        
-        const url = URL.createObjectURL(blob);
-        
-        return url;
-    }
-    
     // NOTE `self` should be type `WorkerGlobalScope`
     // see https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope
-    private static script(self: Worker, Module: VorbisEncoderModule) {
-        // TODO
-        Module.onRuntimeInitialized = function () {
-            self.postMessage({ type: 'load' });
-        };
+    private static main(self: Worker) {
+        const Module = makeVorbisEncoderModule({
+            onRuntimeInitialized() {
+                self.postMessage({ type: 'load' });
+            }
+        });
         
         let handle: number;
         
@@ -84,10 +69,6 @@ class VorbisWorkerScript {
             const data = ev.data;
             
             switch (data.type) {
-            case 'init':
-                importScripts(data.encoderURL);
-                break;
-                
             case 'start':
                 handle = Module._encoder_create_vbr(data.channels, data.sampleRate, data.quality);
                 
@@ -146,7 +127,7 @@ class VorbisEncoder {
     // ---
     
     constructor() {
-        this._worker = new Worker(VorbisWorkerScript.getScriptURL());
+        this._worker = new Worker(getScriptAbsoluteURL());
         
         // ---
         
@@ -157,15 +138,6 @@ class VorbisEncoder {
         // ---
         
         this._worker.onmessage = this.handleEncoderMessage.bind(this);
-        
-        // ---
-        
-        const encoderURL = VorbisEncoderScript.getScriptURL();
-        
-        this._worker.postMessage({
-            type: 'init',
-            encoderURL: encoderURL
-        });
     }
     
     get ondata(): DataCallback {
