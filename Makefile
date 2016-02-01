@@ -22,7 +22,7 @@ WRAPPER_OBJ=$(OUTPUT_DIR)/vorbis_encoder.o
 
 VORBIS_ENCODER=$(OUTPUT_DIR)/vorbis_encoder.js
 
-VORBIS_LIB=$(OUTPUT_DIR)/library.js
+VORBIS_LIB=$(OUTPUT_DIR)/libvorbis.js
 
 TARGETS=$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ) $(VORBIS_ENCODER) $(VORBIS_LIB)
 
@@ -38,7 +38,7 @@ reset-submodules:
 $(OUTPUT_DIR):
 	mkdir $@
 
-$(VORBIS_LIB): typings src/library.ts
+$(VORBIS_LIB): typings src/libvorbis.ts
 	tsc --outDir $(OUTPUT_DIR) -p src
 
 typings:
