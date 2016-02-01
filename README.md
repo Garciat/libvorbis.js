@@ -59,7 +59,7 @@ git submodule update
 make -j
 ```
 
-Then, look for `build/libvorbis.js`.
+Then, look for `build/libvorbis.js` or `build/libvorbis.min.js`.
 
 ## Credits
 
