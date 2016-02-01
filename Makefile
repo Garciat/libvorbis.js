@@ -38,14 +38,19 @@ reset-submodules:
 $(OUTPUT_DIR):
 	mkdir $@
 
-$(VORBIS_LIB): typings src/libvorbis.ts
-	tsc --outDir $(OUTPUT_DIR) -p src
+$(VORBIS_LIB): typings src/libvorbis.ts $(VORBIS_ENCODER)
+	tsc --outDir $(OUTPUT_DIR) -p src; \
+	cat $(VORBIS_ENCODER) >> $@
 
 typings:
 	tsd install
 
-$(VORBIS_ENCODER): $(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ) | $(OUTPUT_DIR)
-	emcc -o $@ $(EMCC_OPTS) -s EXPORTED_FUNCTIONS="@exported_functions.json" $(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ)
+OBJS=$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ)
+
+$(VORBIS_ENCODER): $(OBJECTS) src/vorbis_encoder.pre.js src/vorbis_encoder.post.js | $(OUTPUT_DIR)
+	emcc -o $@ $(EMCC_OPTS) -s EXPORTED_FUNCTIONS="@exported_functions.json" \
+		$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ) \
+		--pre-js src/vorbis_encoder.pre.js --post-js src/vorbis_encoder.post.js
 
 $(OGG_INC): $(OGG_OBJ)
 $(OGG_OBJ): $(OGG_DIR)/Makefile

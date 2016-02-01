@@ -1,0 +1,1 @@
+function makeVorbisEncoderModule(Module, module) {

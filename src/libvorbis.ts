@@ -5,6 +5,30 @@
 /// <reference path="MediaRecorder.d.ts" />
 /// <reference path="vorbis_encoder.d.ts" />
 
+// TODO optimize double JS parsing (via Blob URL)
+class VorbisEncoderScript {
+    private static _url: string;
+    
+    static getScriptURL(): string {
+        if (!VorbisEncoderScript._url) {
+            VorbisEncoderScript._url = VorbisEncoderScript.makeScriptURL();
+        }
+        return VorbisEncoderScript._url;
+    }
+    
+    private static makeScriptURL(): string {
+        const func = makeVorbisEncoderModule.toString();
+        
+        const source = `var Module; (${func})(Module || (Module = {}));`;
+        
+        const blob = new Blob([source], { type: 'application/javascript' });
+        
+        const url = URL.createObjectURL(blob);
+        
+        return url;
+    }
+}
+
 class VorbisWorkerScript {
     private static _url: string;
     
@@ -29,7 +53,7 @@ class VorbisWorkerScript {
     
     // NOTE `self` should be type `WorkerGlobalScope`
     // see https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope
-    private static script(self: Worker, Module: any) {
+    private static script(self: Worker, Module: VorbisEncoderModule) {
         // TODO
         Module.onRuntimeInitialized = function () {
             self.postMessage({ type: 'load' });
@@ -38,12 +62,12 @@ class VorbisWorkerScript {
         let handle: number;
         
         function flush() {
-            const dataLength = _encoder_get_data_len(handle);
+            const dataLength = Module._encoder_get_data_len(handle);
             
             if (dataLength === 0)
                 return;
             
-            const dataPointer = _encoder_get_data(handle);
+            const dataPointer = Module._encoder_get_data(handle);
             
             const chunk = Module.HEAPU8.subarray(dataPointer, dataPointer + dataLength);
             
@@ -51,7 +75,7 @@ class VorbisWorkerScript {
             
             const buffer = data.buffer;
             
-            _encoder_clear_data(handle);
+            Module._encoder_clear_data(handle);
             
             self.postMessage({ type: 'data', buffer: buffer }, [buffer]);
         }
@@ -65,35 +89,35 @@ class VorbisWorkerScript {
                 break;
                 
             case 'start':
-                handle = _encoder_create_vbr(data.channels, data.sampleRate, data.quality);
+                handle = Module._encoder_create_vbr(data.channels, data.sampleRate, data.quality);
                 
-                _encoder_write_headers(handle);
+                Module._encoder_write_headers(handle);
                 
                 flush();
                 break;
                 
             case 'data':
-                _encoder_prepare_analysis_buffers(handle, data.samples);
+                Module._encoder_prepare_analysis_buffers(handle, data.samples);
                 
                 for (let ch = 0; ch < data.channels; ++ch) {
-                    const bufferPtr = _encoder_get_analysis_buffer(handle, ch);
+                    const bufferPtr = Module._encoder_get_analysis_buffer(handle, ch);
                     
                     const array = new Float32Array(data.buffers[ch]);
                     
                     Module.HEAPF32.set(array, bufferPtr >> 2);
                 }
                 
-                _encoder_encode(handle);
+                Module._encoder_encode(handle);
                 
                 flush();
                 break;
                 
             case 'finish':
-                _encoder_finish(handle);
+                Module._encoder_finish(handle);
                 
                 flush();
                 
-                _encoder_destroy(handle);
+                Module._encoder_destroy(handle);
                 
                 self.postMessage({ type: 'finish' });
                 break;
@@ -136,9 +160,7 @@ class VorbisEncoder {
         
         // ---
         
-        const dirname = location.pathname.split('/').slice(0, -1).join('/');
-        
-        const encoderURL = location.protocol + "//" + location.host + dirname + "/vorbis_encoder.js";
+        const encoderURL = VorbisEncoderScript.getScriptURL();
         
         this._worker.postMessage({
             type: 'init',
