@@ -1,7 +1,7 @@
 NATIVE_DIR=$(PWD)/native
 OUTPUT_DIR=$(PWD)/build
 
-EMCC_OPTS=-O3 --llvm-lto 1 --memory-init-file 0 \
+EMCC_OPTS=--llvm-lto 1 --memory-init-file 0 \
 		-s NO_EXIT_RUNTIME=1 -s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
 		-s NO_FILESYSTEM=1 -s NO_BROWSER=1
 
@@ -21,12 +21,15 @@ WRAPPER_DIR=$(NATIVE_DIR)/wrapper
 WRAPPER_OBJ=$(OUTPUT_DIR)/vorbis_encoder.o
 
 VORBIS_ENCODER=$(OUTPUT_DIR)/vorbis_encoder.js
+VORBIS_ENCODER_MIN=$(OUTPUT_DIR)/vorbis_encoder.min.js
 
 VORBIS_LIB=$(OUTPUT_DIR)/libvorbis.js
+VORBIS_LIB_MIN=$(OUTPUT_DIR)/libvorbis.min.js
 
-TARGETS=$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ) $(VORBIS_ENCODER) $(VORBIS_LIB)
+VORBIS_LIB_HEAD=$(OUTPUT_DIR)/libvorbis.head.js
+VORBIS_LIB_HEAD_MIN=$(OUTPUT_DIR)/libvorbis.head.min.js
 
-all: $(TARGETS)
+all: $(VORBIS_LIB) $(VORBIS_LIB_MIN)
 
 clean: reset-submodules clean-bench
 	rm -rf typings $(OGG_PRE) $(VORBIS_PRE) $(WRAPPER_OBJ) $(VORBIS_ENCODER) $(VORBIS_LIB)
@@ -38,19 +41,32 @@ reset-submodules:
 $(OUTPUT_DIR):
 	mkdir $@
 
-$(VORBIS_LIB): typings src/libvorbis.ts $(VORBIS_ENCODER)
-	tsc --outDir $(OUTPUT_DIR) -p src; \
-	cat $(VORBIS_ENCODER) >> $@
+$(VORBIS_LIB): $(VORBIS_LIB_HEAD) $(VORBIS_ENCODER)
+	cat $(VORBIS_LIB_HEAD) $(VORBIS_ENCODER) > $@
+
+$(VORBIS_LIB_MIN): $(VORBIS_LIB_HEAD_MIN) $(VORBIS_ENCODER_MIN)
+	cat $(VORBIS_LIB_HEAD_MIN) $(VORBIS_ENCODER_MIN) > $@
+
+$(VORBIS_LIB_HEAD): typings src/libvorbis.head.ts
+	tsc --outDir $(OUTPUT_DIR) -p src
+
+$(VORBIS_LIB_HEAD_MIN): $(VORBIS_LIB_HEAD)
+	cat $(VORBIS_LIB_HEAD) | uglifyjs -m > $@
 
 typings:
 	tsd install
 
 OBJS=$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ)
 
-$(VORBIS_ENCODER): $(OBJS) src/vorbis_encoder.pre.js src/vorbis_encoder.post.js | $(OUTPUT_DIR)
-	emcc -o $@ $(EMCC_OPTS) -s EXPORTED_FUNCTIONS="@exported_functions.json" \
+VORBIS_ENCODER_OPTS=$(EMCC_OPTS) -s EXPORTED_FUNCTIONS="@exported_functions.json" \
 		$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ) \
 		--pre-js src/vorbis_encoder.pre.js --post-js src/vorbis_encoder.post.js
+
+$(VORBIS_ENCODER): $(OBJS) src/vorbis_encoder.pre.js src/vorbis_encoder.post.js | $(OUTPUT_DIR)
+	emcc -O0 $(VORBIS_ENCODER_OPTS) -o $@ 
+
+$(VORBIS_ENCODER_MIN): $(OBJS) src/vorbis_encoder.pre.js src/vorbis_encoder.post.js | $(OUTPUT_DIR)
+	emcc -O3 $(VORBIS_ENCODER_OPTS) -o $@
 
 $(OGG_INC): $(OGG_OBJ)
 $(OGG_OBJ): $(OGG_DIR)/Makefile
