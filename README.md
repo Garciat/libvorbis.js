@@ -7,14 +7,27 @@
 that implements the W3C [`MediaRecorder`](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder)
 interface**.
 
+Ultimately, **libvorbis.js** allows you to *encode PCM data to Ogg Vorbis in the browser*.
+**Ogg Vorbis** is a free and open-source codec for lossy audio compression.
+
 ** Full compliance under development.
 
 ## Why?
+
+Yes, Firefox already supports the `MediaRecorder` API, which renders this library useless.
 
 Unfortunately, Chromium (Chrome) does not yet ship a public, audio-capable
 implementation of `MediaRecorder`. (It should arrive with Chromium 49.)
 
 **libvorbis.js** aims to fill this void for the time being.
+
+Besides this, encoding audio in the browser is beneficial in the following ways:
+
+* Reduces server load; all the hard work is done in the client's browser
+
+* Reduces browser storage usage ([IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) / [Web Storage](https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API))
+
+* Reduces upload time and data transfer; encoded audio files are a fraction of the size of raw WAV files
 
 ## OK, cool. What now?
 
