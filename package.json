@@ -1,0 +1,17 @@
+{
+  "name": "libvorbis.js",
+  "description": "",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/Garciat/libvorbis.js.git"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "make -j"
+  },
+  "devDependencies": {
+    "typings": "^0.6.5",
+    "typescript": "^1.8.0",
+    "uglifyjs": "^2.4.10"
+  }
+}

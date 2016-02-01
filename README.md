@@ -48,8 +48,19 @@ Besides this, encoding audio in the browser is beneficial in the following ways:
 **Requirements**
 
 - emscripten compiler
-- TypeScript 1.5+ compiler (`npm install -g typescript`)
-- TypeScript Definition Manager (`npm install -g tsd`)
+- node.js & npm
+
+**Preparations**
+
+```bash
+npm install --dev
+```
+
+That should install (locally):
+
+- TypeScript 1.8+ compiler
+- TypeScript Definition Manager
+- UglifyJS
 
 **Instructions**
 

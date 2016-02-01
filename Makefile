@@ -1,5 +1,10 @@
 NATIVE_DIR=$(PWD)/native
 OUTPUT_DIR=$(PWD)/build
+NODE_BIN_DIR=$(PWD)/node_modules/.bin
+
+TSC=$(NODE_BIN_DIR)/tsc
+UGLIFYJS=$(NODE_BIN_DIR)/uglifyjs
+TYPINGS=$(NODE_BIN_DIR)/typings
 
 EMCC_OPTS=--llvm-lto 1 --memory-init-file 0 \
 		-s NO_EXIT_RUNTIME=1 -s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
@@ -48,13 +53,13 @@ $(VORBIS_LIB_MIN): $(VORBIS_LIB_HEAD_MIN) $(VORBIS_ENCODER_MIN)
 	cat $(VORBIS_LIB_HEAD_MIN) $(VORBIS_ENCODER_MIN) > $@
 
 $(VORBIS_LIB_HEAD): typings src/libvorbis.head.ts
-	tsc --outDir $(OUTPUT_DIR) -p src
+	$(TSC) --outDir $(OUTPUT_DIR) -p src
 
 $(VORBIS_LIB_HEAD_MIN): $(VORBIS_LIB_HEAD)
-	cat $(VORBIS_LIB_HEAD) | uglifyjs -m > $@
+	cat $(VORBIS_LIB_HEAD) | $(UGLIFYJS) -m > $@
 
 typings:
-	tsd install
+	$(TYPINGS) install
 
 OBJS=$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ)
 
