@@ -34,7 +34,9 @@ VORBIS_LIB_MIN=$(OUTPUT_DIR)/libvorbis.min.js
 VORBIS_LIB_HEAD=$(OUTPUT_DIR)/libvorbis.head.js
 VORBIS_LIB_HEAD_MIN=$(OUTPUT_DIR)/libvorbis.head.min.js
 
-all: $(VORBIS_LIB) $(VORBIS_LIB_MIN)
+all: $(VORBIS_LIB)
+
+min: $(VORBIS_LIB_MIN)
 
 clean: reset-submodules clean-bench
 	rm -rf typings $(OGG_PRE) $(VORBIS_PRE) $(WRAPPER_OBJ) $(VORBIS_ENCODER) $(VORBIS_LIB)
