@@ -116,7 +116,7 @@ $(BENCH_WD): | $(OUTPUT_DIR)
 bench-cpp: $(BENCH_WD)/test300.raw $(BENCH_WD)/program-cpp
 	cd $(BENCH_WD); time ./program-cpp test300.raw /dev/null
 
-bench-node: $(BENCH_WD)/test300.raw $(BENCH_WD)/program.js $(VORBIS_ENCODER)
+bench-node: $(BENCH_WD)/test300.raw $(BENCH_WD)/program.js $(VORBIS_ENCODER_MIN)
 	cd $(BENCH_WD); \
 	export NODE_PATH=$(OUTPUT_DIR); \
 	time node ./program.js test300.raw /dev/null
