@@ -90,7 +90,10 @@ $(VORBIS_INC): $(VORBIS_OBJ)
 $(VORBIS_OBJ): $(VORBIS_DIR)/Makefile
 	cd $(VORBIS_DIR); emmake make; emmake make install
 $(VORBIS_DIR)/Makefile: $(VORBIS_DIR)/configure
-	cd $(VORBIS_DIR); emconfigure ./configure --prefix=$(VORBIS_PRE) --with-ogg=$(OGG_PRE)
+	cd $(VORBIS_DIR); \
+	export OGG_LIBS="-L$(OGG_PRE)/lib"; \
+	export OGG_CFLAGS="-I$(OGG_PRE)/include"; \
+	emconfigure ./configure --prefix=$(VORBIS_PRE)
 $(VORBIS_DIR)/configure: $(OGG_INC) $(OGG_OBJ)
 	cd $(VORBIS_DIR); PKG_CONFIG_PATH=$(OGG_DIR) ./autogen.sh
 

@@ -1,5 +1,7 @@
 # libvorbis.js
 
+[![Build Status](https://travis-ci.org/Garciat/libvorbis.js.svg?branch=master)](https://travis-ci.org/Garciat/libvorbis.js)
+
 ## What?
 
 **libvorbis.js** is an ASM.JS distribution of C libraries `libogg`,
