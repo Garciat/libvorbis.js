@@ -3,8 +3,8 @@ OUTPUT_DIR=$(PWD)/build
 NODE_BIN_DIR=$(PWD)/node_modules/.bin
 
 TSC=$(NODE_BIN_DIR)/tsc
+TSD=$(NODE_BIN_DIR)/tsd
 UGLIFYJS=$(NODE_BIN_DIR)/uglifyjs
-TYPINGS=$(NODE_BIN_DIR)/typings
 
 EMCC_OPTS=--llvm-lto 1 --memory-init-file 0 \
 		-s NO_EXIT_RUNTIME=1 -s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
@@ -59,7 +59,7 @@ $(VORBIS_LIB_HEAD_MIN): $(VORBIS_LIB_HEAD)
 	cat $(VORBIS_LIB_HEAD) | $(UGLIFYJS) -m > $@
 
 typings:
-	$(TYPINGS) install
+	$(TSD) install
 
 OBJS=$(OGG_OBJ) $(VORBIS_OBJ) $(VORBISENC_OBJ) $(WRAPPER_OBJ)
 
