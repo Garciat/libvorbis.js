@@ -39,11 +39,15 @@ Besides this, encoding audio in the browser is beneficial in the following ways:
 
 ## Install it.
 
-(Soon)
+You can use **bower** to install **libvorbis.js** as a dependency:
+
+```bash
+bower install libvorbis.js
+```
 
 ## Download it.
 
-(Soon)
+[Download](https://github.com/Garciat/libvorbis.js-bower/releases/latest) from the bower distribution repo.
 
 ## Build it.
 
