@@ -5,39 +5,14 @@
 /// <reference path="MediaRecorder.d.ts" />
 /// <reference path="vorbis_encoder.d.ts" />
 
-const getScriptAbsoluteURL = (function () {
-    if (!self.document) {
-        return null;
-    }
-    
-    const script = <HTMLScriptElement>(<any> document).currentScript;
-    const scriptSrc = script.getAttribute('src');
-    
-    const absoluteRegex = /^(blob\:|http\:|https\:)/;
-    
-    let url: string;
-    
-    if (absoluteRegex.test(scriptSrc)) {
-        url = scriptSrc;
-    } else {
-        const dirname = location.pathname.split('/').slice(0, -1).join('/');
-        
-        url = `${location.protocol}//${location.host}`;
-        
-        if (scriptSrc[0] === '/') {
-            url += scriptSrc;
-        } else {
-            url += dirname + '/' + scriptSrc;
-        }	
-    }
-    
-    return () => url;
-})();
-
 class VorbisWorkerScript {
+    static createWorker() {
+        return new Worker(VorbisWorkerScript.getCurrentScriptURL());
+    }
+    
     // NOTE `self` should be type `WorkerGlobalScope`
     // see https://developer.mozilla.org/en-US/docs/Web/API/WorkerGlobalScope
-    private static main(self: Worker) {
+    public static main(self: Worker) {
         const Module = makeVorbisEncoderModule({
             onRuntimeInitialized() {
                 self.postMessage({ type: 'load' });
@@ -105,6 +80,35 @@ class VorbisWorkerScript {
             }
         });
     }
+    
+    private static getCurrentScriptURL = (function () {
+        if (!this.document) {
+            return null;
+        }
+        
+        const script = <HTMLScriptElement>(<any> document).currentScript;
+        const scriptSrc = script.getAttribute('src');
+        
+        const absoluteRegex = /^(blob\:|http\:|https\:)/;
+        
+        let url: string;
+        
+        if (absoluteRegex.test(scriptSrc)) {
+            url = scriptSrc;
+        } else {
+            const dirname = location.pathname.split('/').slice(0, -1).join('/');
+            
+            url = `${location.protocol}//${location.host}`;
+            
+            if (scriptSrc[0] === '/') {
+                url += scriptSrc;
+            } else {
+                url += dirname + '/' + scriptSrc;
+            }	
+        }
+        
+        return () => url;
+    })();
 }
 
 function noop() { }
@@ -127,7 +131,7 @@ class VorbisEncoder {
     // ---
     
     constructor() {
-        this._worker = new Worker(getScriptAbsoluteURL());
+        this._worker = VorbisWorkerScript.createWorker();
         
         // ---
         
