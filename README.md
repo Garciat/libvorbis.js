@@ -10,7 +10,7 @@ interface**.
 Ultimately, **libvorbis.js** allows you to *encode PCM data to Ogg Vorbis in the browser*.
 **Ogg Vorbis** is a free and open-source codec for lossy audio compression.
 
-**libvorbis.js** is 216KB big (minified, gzipped) and runs about 3x slower compared native in V8 (2.5x in Firefox).
+**libvorbis.js** is 216KB big (minified, gzipped) and runs about 3x slower in V8, compared to native. (2.5x in Firefox).
 
 ** Full compliance under development.
 
