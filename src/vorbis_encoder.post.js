@@ -8,6 +8,7 @@ if (module && module.exports) {
 }
 
 // Web Worker Environment
-if (self.document === undefined) {
+var self;
+if (self && self.document === undefined) {
     VorbisWorkerScript.main(self);
 }
