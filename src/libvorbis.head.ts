@@ -10,7 +10,8 @@ interface Window {
     BlobEvent: any;
 }
 
-if (!window.BlobEvent) {
+var window: Window;
+if (window && !window.BlobEvent) {
     window.BlobEvent = function BlobEvent(type: string, init: BlobEventInit) {
         this.type = type;
         this.data = init.data;
