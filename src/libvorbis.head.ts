@@ -5,6 +5,19 @@
 /// <reference path="MediaRecorder.d.ts" />
 /// <reference path="vorbis_encoder.d.ts" />
 
+// BEGIN BlobEvent shim
+interface Window {
+    BlobEvent: any;
+}
+
+if (!window.BlobEvent) {
+    window.BlobEvent = function BlobEvent(type: string, init: BlobEventInit) {
+        this.type = type;
+        this.data = init.data;
+    };
+}
+// END BlobEvent shim
+
 class VorbisWorkerScript {
     static createWorker() {
         return new Worker(VorbisWorkerScript.getCurrentScriptURL());
