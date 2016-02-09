@@ -1,6 +1,6 @@
-NATIVE_DIR=$(PWD)/native
-OUTPUT_DIR=$(PWD)/build
-NODE_BIN_DIR=$(PWD)/node_modules/.bin
+NATIVE_DIR=native
+OUTPUT_DIR=build
+NODE_BIN_DIR=	node_modules/.bin
 
 TSC=$(NODE_BIN_DIR)/tsc
 TSD=$(NODE_BIN_DIR)/tsd
@@ -88,7 +88,7 @@ $(OGG_INC): $(OGG_OBJ)
 $(OGG_OBJ): $(OGG_DIR)/Makefile
 	cd $(OGG_DIR); emmake make; emmake make install
 $(OGG_DIR)/Makefile: $(OGG_DIR)/configure
-	cd $(OGG_DIR); emconfigure ./configure --prefix=$(OGG_PRE)
+	cd $(OGG_DIR); emconfigure ./configure --prefix=$(abspath $(OGG_PRE))
 $(OGG_DIR)/configure: $(OGG_DIR)/configure.ac.bak
 	cd $(OGG_DIR); ./autogen.sh
 # emscripten bug (https://github.com/kripken/emscripten/pull/3711)
@@ -102,11 +102,11 @@ $(VORBIS_OBJ): $(VORBIS_DIR)/Makefile
 	cd $(VORBIS_DIR); emmake make; emmake make install
 $(VORBIS_DIR)/Makefile: $(VORBIS_DIR)/configure
 	cd $(VORBIS_DIR); \
-	export OGG_LIBS="-L$(OGG_PRE)/lib"; \
-	export OGG_CFLAGS="-I$(OGG_PRE)/include"; \
-	emconfigure ./configure --prefix=$(VORBIS_PRE)
+	export OGG_LIBS="-L$(abspath $(OGG_PRE))/lib"; \
+	export OGG_CFLAGS="-I$(abspath $(OGG_PRE))/include"; \
+	emconfigure ./configure --prefix=$(abspath $(VORBIS_PRE))
 $(VORBIS_DIR)/configure: $(OGG_INC) $(OGG_OBJ)
-	cd $(VORBIS_DIR); PKG_CONFIG_PATH=$(OGG_DIR) ./autogen.sh
+	cd $(VORBIS_DIR); PKG_CONFIG_PATH=../$(OGG_DIR) ./autogen.sh
 
 $(VORBISENC_OBJ): $(VORBIS_OBJ)
 
@@ -122,7 +122,7 @@ BENCH_WD=build/bench
 bench: bench-cpp bench-node
 
 clean-bench:
-	cd build; rm -f test300.raw program-cpp
+	rm -rf $(BENCH_WD)
 
 $(BENCH_WD): | $(OUTPUT_DIR)
 	mkdir $@
@@ -132,7 +132,7 @@ bench-cpp: $(BENCH_WD)/test300.raw $(BENCH_WD)/program-cpp
 
 bench-node: $(BENCH_WD)/test300.raw $(BENCH_WD)/program.js $(VORBIS_ENCODER_MIN)
 	cd $(BENCH_WD); \
-	export NODE_PATH=$(OUTPUT_DIR); \
+	export NODE_PATH=$(abspath $(OUTPUT_DIR)); \
 	time node ./program.js test300.raw /dev/null
 
 $(BENCH_WD)/test300.raw: | $(BENCH_WD)
