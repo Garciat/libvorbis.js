@@ -39,7 +39,16 @@ all: $(VORBIS_LIB)
 min: $(VORBIS_LIB_MIN)
 
 clean: reset-submodules clean-bench
-	rm -rf typings $(OGG_PRE) $(VORBIS_PRE) $(WRAPPER_OBJ) $(VORBIS_ENCODER) $(VORBIS_LIB)
+	rm -rf typings \
+	$(VORBIS_LIB) \
+	$(VORBIS_LIB_MIN) \
+	$(VORBIS_LIB_HEAD) \
+	$(VORBIS_LIB_HEAD_MIN) \
+	$(VORBIS_ENCODER) \
+	$(VORBIS_ENCODER_MIN) \
+	$(WRAPPER_OBJ) \
+	$(OGG_PRE) \
+	$(VORBIS_PRE)
 
 reset-submodules:
 	(cd $(OGG_DIR); rm -rf *; git reset --hard); \
