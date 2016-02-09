@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>libvorbis.js by Garciat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">libvorbis.js</h1>
+      <h2 class="project-tagline">Encode audio with vorbis in the browser!</h2>
+      <a href="https://github.com/Garciat/libvorbis.js" class="btn">View on GitHub</a>
+      <a href="https://github.com/Garciat/libvorbis.js/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/Garciat/libvorbis.js/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="libvorbisjs" class="anchor" href="#libvorbisjs" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>libvorbis.js</h1>
+
+<p><a href="https://travis-ci.org/Garciat/libvorbis.js"><img src="https://travis-ci.org/Garciat/libvorbis.js.svg?branch=master" alt="Build Status"></a></p>
+
+<h2>
+<a id="what" class="anchor" href="#what" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What?</h2>
+
+<p><strong>libvorbis.js</strong> is an ASM.JS distribution of C libraries <code>libogg</code>,
+<code>libvorbis</code>, and <code>libvorbisenc</code>. It also includes a library wrapper
+that implements the W3C <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder"><code>MediaRecorder</code></a>
+interface**.</p>
+
+<p>Ultimately, <strong>libvorbis.js</strong> allows you to <em>encode PCM data to Ogg Vorbis in the browser</em>.
+<strong>Ogg Vorbis</strong> is a free and open-source codec for lossy audio compression.</p>
+
+<p><strong>libvorbis.js</strong> is 216KB big (minified, gzipped) and runs about 3x slower in V8, compared to native. (2.5x in Firefox).</p>
+
+<p>** Full compliance under development.</p>
+
+<h2>
+<a id="why" class="anchor" href="#why" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why?</h2>
+
+<p>Yes, Firefox already supports the <code>MediaRecorder</code> API, which renders this library useless.</p>
+
+<p>Unfortunately, Chromium (Chrome) does not yet ship a public, audio-capable
+implementation of <code>MediaRecorder</code>. (It should arrive with Chromium 49.)</p>
+
+<p><strong>libvorbis.js</strong> aims to fill this void for the time being.</p>
+
+<p>Besides this, encoding audio in the browser is beneficial in the following ways:</p>
+
+<ul>
+<li><p>Reduces server load; all the hard work is done in the client's browser</p></li>
+<li><p>Reduces browser storage usage (<a href="https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API">IndexedDB</a> / <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API">Web Storage</a>)</p></li>
+<li><p>Reduces upload time and data transfer; encoded audio files are a fraction of the size of raw WAV files</p></li>
+</ul>
+
+<h2>
+<a id="ok-cool-what-now" class="anchor" href="#ok-cool-what-now" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OK, cool. What now?</h2>
+
+<h2>
+<a id="demo-it" class="anchor" href="#demo-it" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Demo it.</h2>
+
+<p><a href="https://libvorbis-js.surge.sh/">Bare bones recorder</a></p>
+
+<p><a href="https://voice-memos-vorbis.surge.sh/">Voice Memos fork</a> (original by: <a href="https://aerotwist.com/blog/voice-memos/">Paul Lewis</a>)</p>
+
+<h2>
+<a id="install-it" class="anchor" href="#install-it" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install it.</h2>
+
+<p>You can use <strong>bower</strong> to install <strong>libvorbis.js</strong> as a dependency:</p>
+
+<div class="highlight highlight-source-shell"><pre>bower install libvorbis.js</pre></div>
+
+<h2>
+<a id="download-it" class="anchor" href="#download-it" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Download it.</h2>
+
+<p><a href="https://github.com/Garciat/libvorbis.js-bower/releases/latest">Download</a> from the bower distribution repo.</p>
+
+<h2>
+<a id="build-it" class="anchor" href="#build-it" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Build it.</h2>
+
+<p><strong>Requirements</strong></p>
+
+<ul>
+<li>emscripten compiler</li>
+<li>node.js &amp; npm</li>
+</ul>
+
+<p><strong>Preparations</strong></p>
+
+<div class="highlight highlight-source-shell"><pre>npm install --dev</pre></div>
+
+<p>That should install (locally):</p>
+
+<ul>
+<li>TypeScript 1.8+ compiler</li>
+<li>TypeScript Definition Manager</li>
+<li>UglifyJS</li>
+</ul>
+
+<p><strong>Instructions</strong></p>
+
+<div class="highlight highlight-source-shell"><pre>git submodule init
+git submodule update
+make -j</pre></div>
+
+<p>Then, look for <code>build/libvorbis.js</code> or <code>build/libvorbis.min.js</code>.</p>
+
+<h2>
+<a id="credits" class="anchor" href="#credits" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Credits</h2>
+
+<ul>
+<li><a href="http://hotcashew.com/2014/02/chrome-audio-api-and-ogg-vorbis/">Alex Barkan</a></li>
+<li><a href="https://github.com/devongovett/ogg.js">Devon Govett</a></li>
+<li><a href="https://github.com/shovon/libvorbis.js">Salehen Shovon Rahman</a></li>
+<li><a href="https://github.com/itsjoesullivan/libvorbis.js">Jose Sullivan</a></li>
+</ul>
+
+<h2>
+<a id="ogg-license-bsd" class="anchor" href="#ogg-license-bsd" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Ogg License (BSD)</h2>
+
+<p>Copyright (c) 2002, Xiph.org Foundation</p>
+
+<p>Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:</p>
+
+<ul>
+<li><p>Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.</p></li>
+<li><p>Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.</p></li>
+<li><p>Neither the name of the Xiph.org Foundation nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.</p></li>
+</ul>
+
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+
+<h2>
+<a id="vorbis-license-bsd" class="anchor" href="#vorbis-license-bsd" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Vorbis License (BSD)</h2>
+
+<p>Copyright (c) 2002-2015 Xiph.org Foundation</p>
+
+<p>Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:</p>
+
+<ul>
+<li><p>Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.</p></li>
+<li><p>Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.</p></li>
+<li><p>Neither the name of the Xiph.org Foundation nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.</p></li>
+</ul>
+
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/Garciat/libvorbis.js">libvorbis.js</a> is maintained by <a href="https://github.com/Garciat">Garciat</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-19283098-5");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
