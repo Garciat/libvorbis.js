@@ -37,7 +37,9 @@ Besides this, encoding audio in the browser is beneficial in the following ways:
 
 ## Demo it.
 
-(Soon)
+[Bare bones recorder](https://libvorbis-js.surge.sh/)
+
+[Voice Memos fork](https://voice-memos-vorbis.surge.sh/) (original by: [Paul Lewis](https://aerotwist.com/blog/voice-memos/))
 
 ## Install it.
 
