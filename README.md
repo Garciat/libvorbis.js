@@ -51,7 +51,7 @@ bower install libvorbis.js
 
 ## Download it.
 
-[Download](https://github.com/Garciat/libvorbis.js-dist/releases/latest) from the bower distribution repo.
+[Download](https://github.com/Garciat/libvorbis.js-dist/releases/latest) from the distribution repo.
 
 ## Build it.
 
