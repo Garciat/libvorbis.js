@@ -95,9 +95,9 @@
         var ctx = new AudioContext();
         
         for (var n = 0; n < samples; n += chunkSize) {
-            var actualSize = Math.min(chunkSize, samples - n);
+            var actualSize = Math.min(chunkSize, samples - n - 1);
             
-            var chunkBuffer = ctx.createBuffer(channels, chunkSize, ctx.sampleRate);
+            var chunkBuffer = ctx.createBuffer(channels, actualSize, ctx.sampleRate);
             
             for (var ch = 0; ch < channels; ch += 1) {
                 var src  = audioBuffer.getChannelData(ch).subarray(n, n + actualSize);
