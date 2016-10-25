@@ -21,7 +21,7 @@ if (window && !window.BlobEvent) {
 
 class VorbisWorkerScript {
     static createWorker() {
-        return new Worker(VorbisWorkerScript.getCurrentScriptURL());
+        return new Worker(window.LIBVORBISJS_URL || VorbisWorkerScript.getCurrentScriptURL());
     }
     
     // NOTE `self` should be type `WorkerGlobalScope`
